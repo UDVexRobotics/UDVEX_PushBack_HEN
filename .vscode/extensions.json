@@ -1,0 +1,8 @@
+{
+    "recommendations": [
+        "ms-vscode.cpptools",
+        "sigbots.pros",
+        "vexrobotics.vexcode",
+        "github.copilot"
+    ]
+}
