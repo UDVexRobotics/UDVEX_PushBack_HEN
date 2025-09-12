@@ -30,6 +30,7 @@ void initialize()
 {
 	pros::lcd::initialize();
 	pros::lcd::set_text(1, "Hello PROS User!");
+	pros::lcd::set_text(2, "UDVEX FTW!");
 
 	pros::lcd::register_btn1_cb(on_center_button);
 }
