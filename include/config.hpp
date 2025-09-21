@@ -5,8 +5,9 @@
 #define _UDVEX_CONFIG_H_
 
 // Define motors and motor groups here
-pros::MotorGroup right_motors({9}, pros::MotorGearset::blue);
-pros::MotorGroup left_motors({10, 17}, pros::MotorGearset::blue);
+pros::MotorGroup right_motors({19}, pros::MotorGearset::blue);
+pros::MotorGroup left_motors({-18}, pros::MotorGearset::blue);
+pros::MotorGroup intake_motors({1, 2, -10, 11, -12}, pros::MotorGearset::blue);
 
 // Define sensors
 lemlib::OdomSensors sensors(
