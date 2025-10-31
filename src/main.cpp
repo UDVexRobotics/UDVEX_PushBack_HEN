@@ -1,9 +1,24 @@
 #include "main.h"
+#include "NYT_Sudoku_Logo.h"
 #include "config.hpp"
 #include "lemlib/api.hpp" // IWYU pragma: keep
+#include "lemlib/asset.hpp"
+#include "lemlib/pose.hpp"
+#include "liblvgl/core/lv_obj_pos.h"
+#include "liblvgl/display/lv_display.h"
+#include "liblvgl/misc/lv_area.h"
+#include "liblvgl/widgets/image/lv_image.h"
+#include "pros/rtos.hpp"
+#include <cstdio>
 
 extern lemlib::Chassis chassis;
 extern pros::MotorGroup intake_motors;
+
+// Declare the image (defined in another file)
+LV_IMAGE_DECLARE(NYT_Sudoku_Logo);
+
+// Declare Static Autom Path
+ASSET(test_path_txt);
 
 /**
  * A callback function for LLEMU's center button.
@@ -29,11 +44,17 @@ void on_center_button() {
  */
 void initialize() {
   // Initialize the LCD
-  pros::lcd::initialize();
-  pros::lcd::set_text(1, "Hello PROS User!");
-  pros::lcd::set_text(2, "UDVEX FTW!");
+  // pros::lcd::initialize();
+  // pros::lcd::set_text(1, "Hello PROS User!");
+  // pros::lcd::set_text(2, "UDVEX FTW!");
 
-  pros::lcd::register_btn1_cb(on_center_button);
+  // pros::lcd::register_btn1_cb(on_center_button);
+
+  // DISPLAY THE GOAT
+  lv_obj_t *img = lv_image_create(lv_screen_active()); // create an image object
+  lv_image_set_src(img, &NYT_Sudoku_Logo);             // set the image source
+  lv_obj_set_align(
+      img, LV_ALIGN_CENTER); // align the image to the center of the screen
 
   // Calibrate the Sensors
   chassis.calibrate();
@@ -68,7 +89,41 @@ void competition_initialize() {}
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
-void autonomous() {}
+void autonomous() { 
+  
+  // Follow Set path
+  chassis.follow(test_path_txt, 15, 2000);
+  
+  // Set Start position to (0, 0, 0)
+  chassis.setPose(0, 0, 0);
+  // std::cout<<"Heading: "<<chassis.getPose(false).theta<<std::endl;
+  // chassis.turnToHeading(180, 4000);
+  
+  // std::cout<<"Heading: "<<chassis.getPose(false).theta<<std::endl;
+  // return;
+  
+  // Move 48" Forward
+  chassis.moveToPoint(0,48,4000);
+  pros::delay(3000);
+  // Move 48" Backward
+  chassis.moveToPoint(0,0,4000,{.forwards=false});
+  
+  
+  return;
+  // Move 48" Right
+  //chassis.turnToHeading(180, 4000);
+  chassis.moveToPoint(48,0,4000);
+  
+  lemlib::Pose currentPose = chassis.getPose();
+  printf("X: %f, Y: %f, Theta: %f\n", currentPose.x, currentPose.y, currentPose.theta);
+
+  chassis.moveToPose(0, 48, 270, 10000);
+
+
+  // Move 48" Right
+  //chassis.moveToPoint(48,0,10000);
+  return;
+}
 
 /**
  * Runs the operator control code. This function will be started in its own task

@@ -5,9 +5,9 @@
 #define _UDVEX_CONFIG_H_
 
 // Define motors and motor groups here
-pros::MotorGroup right_motors({19}, pros::MotorGearset::blue);
-pros::MotorGroup left_motors({-18}, pros::MotorGearset::blue);
-pros::MotorGroup intake_motors({1, 2, -10, 11, -12}, pros::MotorGearset::blue);
+pros::MotorGroup right_motors({19,17}, pros::MotorGearset::blue);
+pros::MotorGroup left_motors({-18,-16}, pros::MotorGearset::blue);
+pros::MotorGroup intake_motors({1, 2, -10, 11, -13}, pros::MotorGearset::blue);
 
 // Define sensors
 lemlib::OdomSensors sensors(
@@ -21,14 +21,24 @@ lemlib::OdomSensors sensors(
 // lateral PID controller
 lemlib::ControllerSettings lateral_controller(10,  // proportional gain (kP)
                                               0,   // integral gain (kI)
-                                              3,   // derivative gain (kD)
-                                              3,   // anti windup
-                                              1,   // small error range, in inches
-                                              100, // small error range timeout, in milliseconds
-                                              3,   // large error range, in inches
-                                              500, // large error range timeout, in milliseconds
-                                              20   // maximum acceleration (slew)
+                                              7,   // derivative gain (kD)
+                                              0,   // anti windup
+                                              0,   // small error range, in inches
+                                              0, // small error range timeout, in milliseconds
+                                              0,   // large error range, in inches
+                                              0, // large error range timeout, in milliseconds
+                                              0   // maximum acceleration (slew)
 );
+// lemlib::ControllerSettings lateral_controller(10,  // proportional gain (kP)
+//                                               0,   // integral gain (kI)
+//                                               7,   // derivative gain (kD)
+//                                               3,   // anti windup
+//                                               1,   // small error range, in inches
+//                                               100, // small error range timeout, in milliseconds
+//                                               3,   // large error range, in inches
+//                                               500, // large error range timeout, in milliseconds
+//                                               20   // maximum acceleration (slew)
+// );
 
 // angular PID controller
 lemlib::ControllerSettings angular_controller(2,   // proportional gain (kP)
