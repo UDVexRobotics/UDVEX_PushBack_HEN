@@ -1,22 +1,48 @@
 #include "lemlib/api.hpp" // IWYU pragma: keep
 #include "api.h"
+#include "lemlib/chassis/trackingWheel.hpp"
 
 #ifndef _UDVEX_CONFIG_H_
 #define _UDVEX_CONFIG_H_
 
 // Define motors and motor groups here
-pros::MotorGroup right_motors({19,17}, pros::MotorGearset::blue);
-pros::MotorGroup left_motors({-18,-16}, pros::MotorGearset::blue);
-pros::MotorGroup intake_motors({1, 2, -10, 11, -13}, pros::MotorGearset::blue);
+pros::MotorGroup right_motors({-1}, pros::MotorGearset::blue);
+pros::MotorGroup left_motors({-17}, pros::MotorGearset::blue);
+pros::MotorGroup intake_motors({21}, pros::MotorGearset::blue);
+
+// IMU Sensor
+pros::Imu imu_sensor(10);
+
+// Tracking Wheels
+pros::Rotation vertical_rotation(20);
+pros::Rotation horizontal_rotation(11);
+lemlib::TrackingWheel vertical_tracking_wheel(
+    &vertical_rotation, // rotation sensor
+    lemlib::Omniwheel::NEW_2, // orientation
+    -3               // distance from the center of the robot (inches)
+);
+lemlib::TrackingWheel horizontal_tracking_wheel(
+    &horizontal_rotation, // rotation sensor
+    lemlib::Omniwheel::NEW_2, // orientation
+    0                 // distance from the center of the robot (inches)
+);
 
 // Define sensors
 lemlib::OdomSensors sensors(
-    nullptr, // Vertical tracking wheel 1
+    &vertical_tracking_wheel, // Vertical tracking wheel 1
     nullptr, // Vertical tracking wheel 2
-    nullptr, // Horizontal tracking wheel 1
+    &horizontal_tracking_wheel, // Horizontal tracking wheel 1
     nullptr, // Horizontal tracking wheel 2
-    nullptr  // Inertial sensor
+    &imu_sensor  // Inertial sensor
 );
+
+// lemlib::OdomSensors sensors(
+//     nullptr, // Vertical tracking wheel 1
+//     nullptr, // Vertical tracking wheel 2
+//     nullptr, // Horizontal tracking wheel 1
+//     nullptr, // Horizontal tracking wheel 2
+//     nullptr  // Inertial sensor
+// );
 
 // lateral PID controller
 lemlib::ControllerSettings lateral_controller(10,  // proportional gain (kP)
