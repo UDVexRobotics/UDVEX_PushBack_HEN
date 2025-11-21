@@ -26,7 +26,6 @@ ASSET(test_path_txt);
  * When this callback is fired, it will toggle line 2 of the LCD text between
  * "I was pressed!" and nothing.
  */
-<<<<<<< HEAD
 
 void on_center_button()
 {
@@ -40,7 +39,6 @@ void on_center_button()
 	{
 		pros::lcd::clear_line(2);
 	}
-=======
 void on_center_button() {
   static bool pressed = false;
   pressed = !pressed;
@@ -49,7 +47,6 @@ void on_center_button() {
   } else {
     pros::lcd::clear_line(2);
   }
->>>>>>> d6c404924f4aabd91ef29f80677a63f516530556
 }
 
 /**
@@ -58,20 +55,17 @@ void on_center_button() {
  * All other competition modes are blocked by initialize; it is recommended
  * to keep execution time for this mode under a few seconds.
  */
-<<<<<<< HEAD
 void initialize()
 {
 	pros::lcd::initialize();
 	pros::lcd::set_text(1, "Hello PROS User!");
 	pros::lcd::set_text(2, "UDVEX FTW!");
 	pros::lcd::set_text(3, "varsha");
-=======
 void initialize() {
   // Initialize the LCD
   // pros::lcd::initialize();
   // pros::lcd::set_text(1, "Hello PROS User!");
   // pros::lcd::set_text(2, "UDVEX FTW!");
->>>>>>> d6c404924f4aabd91ef29f80677a63f516530556
 
   // pros::lcd::register_btn1_cb(on_center_button);
 
@@ -163,13 +157,11 @@ void autonomous() {
  * operator control task will be stopped. Re-enabling the robot will restart the
  * task, not resume it from where it left off.
  */
-<<<<<<< HEAD
 void opcontrol()
 {
 	pros::Controller master(pros::E_CONTROLLER_MASTER);
 	pros::MotorGroup left_mg({1});	// Creates a motor group with forwards ports 1 & 3 and reversed port 2
 	pros::MotorGroup right_mg({4}); // Creates a motor group with forwards port 5 and reversed ports 4 & 6
-=======
 void opcontrol() {
   pros::Controller master(pros::E_CONTROLLER_MASTER);
   while (true) {
@@ -180,7 +172,6 @@ void opcontrol() {
                          0); // Prints status of the emulated screen LCDs
                              // Gets the Y axis of the left joystick
     int32_t leftY = master.get_analog(ANALOG_LEFT_Y);
->>>>>>> d6c404924f4aabd91ef29f80677a63f516530556
 
     // Gets the X axis of the right joystick
     int32_t rightX = master.get_analog(ANALOG_LEFT_X);
