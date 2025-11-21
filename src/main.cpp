@@ -28,7 +28,6 @@ ASSET(test_path_txt);
  */
 
 void on_center_button()
-{
 	static bool pressed = false;
 	pressed = !pressed;
 	if (pressed)
@@ -56,11 +55,9 @@ void on_center_button() {
  * to keep execution time for this mode under a few seconds.
  */
 void initialize()
-{
 	pros::lcd::initialize();
 	pros::lcd::set_text(1, "Hello PROS User!");
 	pros::lcd::set_text(2, "UDVEX FTW!");
-	pros::lcd::set_text(3, "varsha");
 void initialize() {
   // Initialize the LCD
   // pros::lcd::initialize();
@@ -158,7 +155,6 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
 void opcontrol()
-{
 	pros::Controller master(pros::E_CONTROLLER_MASTER);
 	pros::MotorGroup left_mg({1});	// Creates a motor group with forwards ports 1 & 3 and reversed port 2
 	pros::MotorGroup right_mg({4}); // Creates a motor group with forwards port 5 and reversed ports 4 & 6
