@@ -8,17 +8,24 @@
 #include "liblvgl/display/lv_display.h"
 #include "liblvgl/misc/lv_area.h"
 #include "liblvgl/widgets/image/lv_image.h"
+#include "pros/adi.hpp"
 #include "pros/rtos.hpp"
 #include <cstdio>
+
+
 
 extern lemlib::Chassis chassis;
 extern pros::MotorGroup intake_motors;
 
+#define SUDOKU_DISPLAY 0
+
+#if SUDOKU_DISPLAY
 // Declare the image (defined in another file)
 LV_IMAGE_DECLARE(NYT_Sudoku_Logo);
+#endif
 
 // Declare Static Autom Path
-ASSET(test_path_txt);
+ASSET(TestAUTO_txt);
 
 /**
  * A callback function for LLEMU's center button.
@@ -44,18 +51,17 @@ void on_center_button() {
  */
 void initialize() {
   // Initialize the LCD
-  // pros::lcd::initialize();
-  // pros::lcd::set_text(1, "Hello PROS User!");
-  // pros::lcd::set_text(2, "UDVEX FTW!");
+  pros::lcd::initialize();
 
-  // pros::lcd::register_btn1_cb(on_center_button);
+  pros::lcd::register_btn1_cb(on_center_button);
 
+  #if SUDOKU_DISPLAY
   // DISPLAY THE GOAT
   lv_obj_t *img = lv_image_create(lv_screen_active()); // create an image object
   lv_image_set_src(img, &NYT_Sudoku_Logo);             // set the image source
   lv_obj_set_align(
       img, LV_ALIGN_CENTER); // align the image to the center of the screen
-
+  #endif
   // Calibrate the Sensors
   chassis.calibrate();
 }
@@ -91,11 +97,12 @@ void competition_initialize() {}
  */
 void autonomous() { 
   
-  // Follow Set path
-  chassis.follow(test_path_txt, 15, 2000);
-  
   // Set Start position to (0, 0, 0)
   chassis.setPose(0, 0, 0);
+  // Follow Set path
+  chassis.follow(TestAUTO_txt, 15, 2000);
+  
+  return;
   // std::cout<<"Heading: "<<chassis.getPose(false).theta<<std::endl;
   // chassis.turnToHeading(180, 4000);
   
@@ -109,15 +116,12 @@ void autonomous() {
   chassis.moveToPoint(0,0,4000,{.forwards=false});
   
   
-  return;
+
   // Move 48" Right
   //chassis.turnToHeading(180, 4000);
   chassis.moveToPoint(48,0,4000);
   
-  lemlib::Pose currentPose = chassis.getPose();
-  printf("X: %f, Y: %f, Theta: %f\n", currentPose.x, currentPose.y, currentPose.theta);
-
-  chassis.moveToPose(0, 48, 270, 10000);
+  chassis.moveToPose(0, 0, 270, 10000);
 
 
   // Move 48" Right
@@ -140,14 +144,15 @@ void autonomous() {
  */
 void opcontrol() {
   pros::Controller master(pros::E_CONTROLLER_MASTER);
+  pros::Controller partner(pros::E_CONTROLLER_PARTNER);
+  int clk = 0;
   while (true) {
-    pros::lcd::print(0, "%d %d %d",
-                     (pros::lcd::read_buttons() & LCD_BTN_LEFT) >> 2,
-                     (pros::lcd::read_buttons() & LCD_BTN_CENTER) >> 1,
-                     (pros::lcd::read_buttons() & LCD_BTN_RIGHT) >>
-                         0); // Prints status of the emulated screen LCDs
-                             // Gets the Y axis of the left joystick
+    // pros::lcd::print(1, "Time: %d", clk);
+    // clk += 20;
     int32_t leftY = master.get_analog(ANALOG_LEFT_Y);
+
+    // Test Comp Switch
+    leftY += partner.get_analog(ANALOG_LEFT_Y);
 
     // Gets the X axis of the right joystick
     int32_t rightX = master.get_analog(ANALOG_LEFT_X);
@@ -158,6 +163,20 @@ void opcontrol() {
     // Intake control
     int32_t intake_motors_control = master.get_analog(ANALOG_RIGHT_Y);
     intake_motors.move(intake_motors_control);
+
+    lemlib::Pose currentPose = chassis.getPose();
+    pros::lcd::print(4, "X: %f, Y: %f, Theta: %f", currentPose.x, currentPose.y, currentPose.theta);
+    
+    bool aBtn = master.get_digital(DIGITAL_A);
+    bool bBtn = master.get_digital(DIGITAL_B);
+    
+    if (aBtn) {
+      piston.set_value(true);
+    } 
+    else if (bBtn) {
+      piston.set_value(false);
+    }
+
 
     pros::delay(20); // Run for 20 ms then update
   }

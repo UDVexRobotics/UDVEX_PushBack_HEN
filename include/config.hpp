@@ -5,17 +5,25 @@
 #ifndef _UDVEX_CONFIG_H_
 #define _UDVEX_CONFIG_H_
 
+#define LEFT_MOTOR_PORTS {-1,-10,18,19}
+#define RIGHT_MOTOR_PORTS {7,-8,9,-17}
+#define IMU_PORT 2
+#define INTAKE_MOTOR_PORTS {-11,12,-13,14,15,-16}
+#define VERTICAL_TRACKING_WHEEL_PORT 20
+#define HORIZONTAL_TRACKING_WHEEL_PORT 21
+
+
 // Define motors and motor groups here
-pros::MotorGroup right_motors({-1}, pros::MotorGearset::blue);
-pros::MotorGroup left_motors({-17}, pros::MotorGearset::blue);
-pros::MotorGroup intake_motors({21}, pros::MotorGearset::blue);
+pros::MotorGroup right_motors(RIGHT_MOTOR_PORTS, pros::MotorGearset::blue);
+pros::MotorGroup left_motors(LEFT_MOTOR_PORTS, pros::MotorGearset::blue);
+pros::MotorGroup intake_motors(INTAKE_MOTOR_PORTS, pros::MotorGearset::blue);
 
 // IMU Sensor
-pros::Imu imu_sensor(10);
+pros::Imu imu_sensor(IMU_PORT);
 
 // Tracking Wheels
-pros::Rotation vertical_rotation(20);
-pros::Rotation horizontal_rotation(11);
+pros::Rotation vertical_rotation(VERTICAL_TRACKING_WHEEL_PORT);
+pros::Rotation horizontal_rotation(HORIZONTAL_TRACKING_WHEEL_PORT);
 lemlib::TrackingWheel vertical_tracking_wheel(
     &vertical_rotation, // rotation sensor
     lemlib::Omniwheel::NEW_2, // orientation
@@ -93,5 +101,8 @@ lemlib::Chassis chassis(drivetrain,         // drivetrain settings
                         angular_controller, // angular PID settings
                         sensors             // odometry sensors
 );
+
+// ADI Port Devices
+pros::adi::DigitalOut piston ('A');
 
 #endif // _UDVEX_CONFIG_H_
