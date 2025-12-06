@@ -9,17 +9,27 @@
 #define RIGHT_MOTOR_PORTS {7,-8,9,-17}
 #define IMU_PORT 2
 #define INTAKE_MOTOR_PORTS {-11,12,-13,14,15,-16}
+#define TOP_MOTOR_PORTS {16}
 #define VERTICAL_TRACKING_WHEEL_PORT 20
 #define HORIZONTAL_TRACKING_WHEEL_PORT 21
+
+#define LIFT_PISTON_PORT 'A'
+#define INTAKE_PISTON_PORT 'B'
 
 
 // Define motors and motor groups here
 pros::MotorGroup right_motors(RIGHT_MOTOR_PORTS, pros::MotorGearset::blue);
 pros::MotorGroup left_motors(LEFT_MOTOR_PORTS, pros::MotorGearset::blue);
 pros::MotorGroup intake_motors(INTAKE_MOTOR_PORTS, pros::MotorGearset::blue);
+pros::MotorGroup top_motors(TOP_MOTOR_PORTS, pros::MotorGearset::blue);
 
 // IMU Sensor
 pros::Imu imu_sensor(IMU_PORT);
+
+// ADI Port Devices
+pros::adi::DigitalOut lift_piston (LIFT_PISTON_PORT);
+//pros::ADIDigitalOut lift_piston (LIFT_PISTON_PORT);
+pros::adi::DigitalOut  intake_piston (INTAKE_PISTON_PORT);
 
 // Tracking Wheels
 pros::Rotation vertical_rotation(VERTICAL_TRACKING_WHEEL_PORT);
@@ -102,7 +112,5 @@ lemlib::Chassis chassis(drivetrain,         // drivetrain settings
                         sensors             // odometry sensors
 );
 
-// ADI Port Devices
-pros::adi::DigitalOut piston ('A');
 
 #endif // _UDVEX_CONFIG_H_

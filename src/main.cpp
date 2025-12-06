@@ -16,6 +16,7 @@
 
 extern lemlib::Chassis chassis;
 extern pros::MotorGroup intake_motors;
+extern pros::MotorGroup top_motors;
 
 #define SUDOKU_DISPLAY 0
 
@@ -143,41 +144,82 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
+
+  // Initialize Controllers
   pros::Controller master(pros::E_CONTROLLER_MASTER);
   pros::Controller partner(pros::E_CONTROLLER_PARTNER);
+
+
+bool lift_state = false;
+bool intake_state = false;
+
+// Track previous button states for edge detection
+bool last_lift_button = false;
+bool last_intake_button = false;
+
   int clk = 0;
   while (true) {
-    // pros::lcd::print(1, "Time: %d", clk);
-    // clk += 20;
-    int32_t leftY = master.get_analog(ANALOG_LEFT_Y);
 
-    // Test Comp Switch
-    leftY += partner.get_analog(ANALOG_LEFT_Y);
+    // Gets the Y axis of the left joystick
+    int32_t leftY = master.get_analog(ANALOG_LEFT_Y);
 
     // Gets the X axis of the right joystick
     int32_t rightX = master.get_analog(ANALOG_LEFT_X);
 
-    // Arcade control scheme
-    chassis.arcade(leftY, rightX);
-
-    // Intake control
-    int32_t intake_motors_control = master.get_analog(ANALOG_RIGHT_Y);
-    intake_motors.move(intake_motors_control);
 
     lemlib::Pose currentPose = chassis.getPose();
     pros::lcd::print(4, "X: %f, Y: %f, Theta: %f", currentPose.x, currentPose.y, currentPose.theta);
     
-    bool aBtn = master.get_digital(DIGITAL_A);
-    bool bBtn = master.get_digital(DIGITAL_B);
-    
-    if (aBtn) {
-      piston.set_value(true);
-    } 
-    else if (bBtn) {
-      piston.set_value(false);
+    // Arcade control scheme
+    chassis.arcade(leftY, rightX);
+
+    // Intake control
+    int32_t outtake = partner.get_digital(pros::E_CONTROLLER_DIGITAL_R1);
+    int32_t intake = partner.get_digital(pros::E_CONTROLLER_DIGITAL_R2);
+    int32_t intake2 = partner.get_digital(pros::E_CONTROLLER_DIGITAL_A);
+    if(outtake)
+    {
+      intake_motors.move(-127);
+      top_motors.move(-127);
+      //first_stage.move(-127*2/3);
+    }
+    else if (intake){
+      intake_motors.move(127);
+      top_motors.move(127);
+      //first_stage.move(127*2/3);
+    }
+    else if (intake2)
+    {
+      intake_motors.move(127);
+      top_motors.move(-127);
+      //first_stage.move(127*2/3);
+    }
+    else
+    {
+      intake_motors.move(0);
+      top_motors.move(0);
+      //first_stage.move(0);
     }
 
+    bool lift_button = master.get_digital(pros::E_CONTROLLER_DIGITAL_L1);
 
+    // Rising edge: button just got pressed
+    if (lift_button && !last_lift_button) {
+        lift_state = !lift_state;        // toggle
+        lift_piston.set_value(lift_state);
+    }
+    last_lift_button = lift_button;
+
+
+    // ---- INTAKE PISTON TOGGLE (use A) ----
+    bool intake_button = partner.get_digital(pros::E_CONTROLLER_DIGITAL_L2);
+
+    if (intake_button && !last_intake_button) {
+        intake_state = !intake_state;    // toggle
+        intake_piston.set_value(intake_state);
+    }
+    last_intake_button = intake_button;
+    
     pros::delay(20); // Run for 20 ms then update
   }
 }
