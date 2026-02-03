@@ -8,15 +8,14 @@
 #include "liblvgl/display/lv_display.h"
 #include "liblvgl/misc/lv_area.h"
 #include "liblvgl/widgets/image/lv_image.h"
+#include "macros.hpp"
 #include "pros/adi.hpp"
 #include "pros/rtos.hpp"
 #include <cstdio>
 
-
-
-extern lemlib::Chassis chassis;
-extern pros::MotorGroup intake_motors;
-extern pros::MotorGroup top_motors;
+// extern lemlib::Chassis chassis;
+// extern pros::MotorGroup intake_motors;
+// extern pros::MotorGroup top_motors;
 
 #define SUDOKU_DISPLAY 0
 
@@ -63,8 +62,10 @@ void initialize() {
   lv_obj_set_align(
       img, LV_ALIGN_CENTER); // align the image to the center of the screen
   #endif
+  imu_sensor.reset();
   // Calibrate the Sensors
   chassis.calibrate();
+  pros::delay(2000);
 }
 
 /**
@@ -100,10 +101,34 @@ void autonomous() {
   
   // Set Start position to (0, 0, 0)
   chassis.setPose(0, 0, 0);
+  const int timeout_time = 3500;
+
+  chassis.moveToPose(-36, 24, -90, timeout_time, {.forwards = true}, false);
+  lemlib::Pose currentPose = chassis.getPose();
+  pros::lcd::print(1, "X: %f, Y: %f, Theta: %f", currentPose.x, currentPose.y,
+                   currentPose.theta);
+  chassis.turnToHeading(-180, timeout_time, {}, false);
+  chassis.moveToPose(-36, 0, -180, timeout_time, {.forwards = true}, false);
+  currentPose = chassis.getPose();
+  pros::lcd::print(2, "X: %f, Y: %f, Theta: %f", currentPose.x, currentPose.y,
+                   currentPose.theta);
+  chassis.moveToPose(-36, 24, -180, timeout_time, {.forwards = false}, false);
+  currentPose = chassis.getPose();
+  pros::lcd::print(3, "X: %f, Y: %f, Theta: %f", currentPose.x, currentPose.y,
+                   currentPose.theta);
+  chassis.turnToHeading(0, timeout_time, {}, false);
+  currentPose = chassis.getPose();
+  pros::lcd::print(4, "X: %f, Y: %f, Theta: %f", currentPose.x, currentPose.y,
+                   currentPose.theta);
+  // chassis.moveToPose(-24, 0, -180, timeout_time,
+  //                    {.forwards = true, .lead = 0.3});
+
   // Follow Set path
-  chassis.follow(TestAUTO_txt, 15, 2000);
-  
-  return;
+  // chassis.follow(TestAUTO_txt, 15, 2000);
+
+  chassis.cancelAllMotions();
+
+#if 0
   // std::cout<<"Heading: "<<chassis.getPose(false).theta<<std::endl;
   // chassis.turnToHeading(180, 4000);
   
@@ -127,6 +152,7 @@ void autonomous() {
 
   // Move 48" Right
   //chassis.moveToPoint(48,0,10000);
+#endif
   return;
 }
 
@@ -174,30 +200,28 @@ bool last_intake_button = false;
     chassis.arcade(leftY, rightX);
 
     // Intake control
-    int32_t outtake = partner.get_digital(pros::E_CONTROLLER_DIGITAL_R1);
-    int32_t intake = partner.get_digital(pros::E_CONTROLLER_DIGITAL_R2);
-    int32_t intake2 = partner.get_digital(pros::E_CONTROLLER_DIGITAL_A);
-    if(outtake)
-    {
-      intake_motors.move(-127);
-      top_motors.move(-127);
-      //first_stage.move(-127*2/3);
-    }
-    else if (intake){
-      intake_motors.move(127);
-      top_motors.move(127);
+    int32_t buttonOutake = master.get_digital(pros::E_CONTROLLER_DIGITAL_R1);
+    int32_t buttonIntake = master.get_digital(pros::E_CONTROLLER_DIGITAL_R2);
+    int32_t buttonIntakeHold = master.get_digital(pros::E_CONTROLLER_DIGITAL_A);
+    if (buttonOutake) {
+      // intake_motors.move(-127 / 2);
+      // top_motors.move(-127 / 2);
+      macros::intake_state(macros::IntakeState::OUTTAKE);
+      // first_stage.move(-127*2/3);
+    } else if (buttonIntake) {
+      // intake_motors.move(127);
+      // top_motors.move(127);
+      macros::intake_state(macros::IntakeState::INTAKE_ON);
+      // first_stage.move(127*2/3);
+    } else if (buttonIntakeHold) {
+      // intake_motors.move(127);
+      // top_motors.move(-127);
+      macros::intake_state(macros::IntakeState::INTAKE_HOLD);
       //first_stage.move(127*2/3);
-    }
-    else if (intake2)
-    {
-      intake_motors.move(127);
-      top_motors.move(-127);
-      //first_stage.move(127*2/3);
-    }
-    else
-    {
-      intake_motors.move(0);
-      top_motors.move(0);
+    } else {
+      // intake_motors.move(0);
+      // top_motors.move(0);
+      macros::intake_state(macros::IntakeState::INTAKE_OFF);
       //first_stage.move(0);
     }
 
@@ -212,7 +236,7 @@ bool last_intake_button = false;
 
 
     // ---- INTAKE PISTON TOGGLE (use A) ----
-    bool intake_button = partner.get_digital(pros::E_CONTROLLER_DIGITAL_L2);
+    bool intake_button = master.get_digital(pros::E_CONTROLLER_DIGITAL_L2);
 
     if (intake_button && !last_intake_button) {
         intake_state = !intake_state;    // toggle
