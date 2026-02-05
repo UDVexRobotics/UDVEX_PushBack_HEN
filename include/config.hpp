@@ -5,21 +5,70 @@
 #ifndef _UDVEX_CONFIG_H_
 #define _UDVEX_CONFIG_H_
 
-#define LEFT_MOTOR_PORTS {9, -10, 13, -17}
-#define RIGHT_MOTOR_PORTS {-4, 5, 7, -8}
-#define IMU_PORT 21
-#define INTAKE_MOTOR_PORTS {11, -12, 14, -15, 16}
-#define TOP_MOTOR_PORTS {-2}
-#define VERTICAL_TRACKING_WHEEL_PORT 3
-#define HORIZONTAL_TRACKING_WHEEL_PORT 6
+#define ROBOT_HEN 0
+#define ROBOT_EGG 1
 
-#define LIFT_PISTON_PORT 'A'
-#define INTAKE_PISTON_PORT 'B'
+/**
+ * Select Robot ID here
+ * ROBOT_HEN: Robot 0
+ * ROBOT_EGG: Robot 1
+ */
+#define ROBOT_ID ROBOT_HEN
+
+/** Configuartion for Robot 1 (EGG) */
+#if ROBOT_ID == ROBOT_EGG
+/** Port Mapping */
+#define LEFT_MOTOR_PORTS {9, -10, 13, -17} // Numerical Ports for left motors
+#define RIGHT_MOTOR_PORTS {-4, 5, 7, -8}   // Numerical Ports for right motors
+#define IMU_PORT 21                        // Port for Inertial Measurement Unit
+#define INTAKE_MOTOR_PORTS {11, -12, 14, -15, 16} // Ports for intake motors
+#define TOP_MOTOR_PORTS                                                        \
+  {-2} // Ports for top motor(s) to be used for holding game pieces
+#define VERTICAL_TRACKING_WHEEL_PORT 3   // Port for vertical tracking wheel
+#define HORIZONTAL_TRACKING_WHEEL_PORT 6 // Port for horizontal tracking wheel
+
+#define LIFT_PISTON_PORT 'A'   // Alphabetical Port for lift piston
+#define INTAKE_PISTON_PORT 'B' // Alphabetical Port for intake piston
+
+/** Controls Mapping */
+#define OUTAKE_BUTTON pros::E_CONTROLLER_DIGITAL_R1
+#define INTAKE_BUTTON pros::E_CONTROLLER_DIGITAL_R2
+#define INTAKE_REFILL_BUTTON pros::E_CONTROLLER_DIGITAL_A
+#define LIFT_PISTON_BUTTON pros::E_CONTROLLER_DIGITAL_L1
+#define INTAKE_PISTON_BUTTON pros::E_CONTROLLER_DIGITAL_L2
+
+/** Configuration for Robot 0 (HEN) */
+#else
+/** Port Mapping */
+#define LEFT_MOTOR_PORTS {9, -10, 12, -13} // Numerical Ports for left motors
+#define RIGHT_MOTOR_PORTS {7, -8, -17, 18} // Numerical Ports for right motors
+#define IMU_PORT 1                         // Port for Inertial Measurement Unit
+#define INTAKE_MOTOR_PORTS {5, 6, 11, 14, -15} // Ports for intake motors
+#define TOP_MOTOR_PORTS                                                        \
+  {16} // Ports for top motor(s) to be used for holding game pieces
+#define VERTICAL_TRACKING_WHEEL_PORT 2   // Port for vertical tracking wheel
+#define HORIZONTAL_TRACKING_WHEEL_PORT 4 // Port for horizontal tracking wheel
+
+#define LIFT_PISTON_PORT 'A'   // Alphabetical Port for lift piston
+#define INTAKE_PISTON_PORT 'B' // Alphabetical Port for intake piston
+
+/** Controls */
+#define OUTAKE_BUTTON pros::E_CONTROLLER_DIGITAL_R1
+#define INTAKE_BUTTON pros::E_CONTROLLER_DIGITAL_A
+#define INTAKE_REFILL_BUTTON pros::E_CONTROLLER_DIGITAL_R2
+#define LIFT_PISTON_BUTTON pros::E_CONTROLLER_DIGITAL_L1
+#define INTAKE_PISTON_BUTTON pros::E_CONTROLLER_DIGITAL_L2
+
+#endif
 
 /** Constants */
 #define MAX_MOTOR_VOLTAGE 127    // Maximum voltage for motors
 #define MIN_MOTOR_VOLTAGE -127   // Minimum voltage for motors
-#define INTAKE_MOTOR_VOLTAGE 127 // Voltage for intake motors
+#define INTAKE_MOTOR_VOLTAGE MAX_MOTOR_VOLTAGE // Voltage for intake motors
+
+// Initialize Controllers
+inline pros::Controller master(pros::E_CONTROLLER_MASTER);
+inline pros::Controller partner(pros::E_CONTROLLER_PARTNER);
 
 // Define motors and motor groups here
 inline pros::MotorGroup right_motors(RIGHT_MOTOR_PORTS,

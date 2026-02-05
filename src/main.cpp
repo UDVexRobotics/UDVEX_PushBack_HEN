@@ -10,7 +10,9 @@
 #include "liblvgl/widgets/image/lv_image.h"
 #include "macros.hpp"
 #include "pros/adi.hpp"
+#include "pros/rtos.h"
 #include "pros/rtos.hpp"
+#include <cstdint>
 #include <cstdio>
 
 // extern lemlib::Chassis chassis;
@@ -25,7 +27,28 @@ LV_IMAGE_DECLARE(NYT_Sudoku_Logo);
 #endif
 
 // Declare Static Autom Path
-ASSET(TestAUTO_txt);
+// ASSET(TestAUTO_txt);
+// ASSET(autom_txt);
+// ASSET(automloader_txt);
+// ASSET(automlowergoal_txt);
+// ASSET(automlowergoaldump_txt);
+// ASSET(AutomAction4_txt);
+// ASSET(AutomAction5_txt);
+#if ROBOT_ID == ROBOT_HEN
+ASSET(AutomAction1_L_txt);
+ASSET(AutomAction2_L_txt);
+ASSET(AutomAction3_L_txt);
+ASSET(AutomAction4_L_txt);
+ASSET(AutomAction5_L_txt);
+ASSET(AutomAction6_L_txt);
+#else
+ASSET(AutomAction1_R_txt);
+ASSET(AutomAction2_R_txt);
+ASSET(AutomAction3_R_txt);
+ASSET(AutomAction4_R_txt);
+ASSET(AutomAction5_R_txt);
+ASSET(AutomAction6_R_txt);
+#endif
 
 /**
  * A callback function for LLEMU's center button.
@@ -44,6 +67,28 @@ void on_center_button() {
 }
 
 /**
+ * @bug causes program to freeze
+ * Intention is to print debugging stats to the controller. Need to explore task
+ * feasability more later
+ */
+void controllerTask(void *param) {
+  while (true) {
+    // Your controller code here
+    lemlib::Pose currentPose = chassis.getPose();
+    pros::lcd::print(1, "X: %f, Y: %f, Theta: %f", currentPose.x, currentPose.y,
+                     currentPose.theta);
+
+    master.clear_line(0);
+    master.print(0, 0, "X: %f", currentPose.x);
+    master.clear_line(1);
+    master.print(1, 0, "Y: %f", currentPose.y);
+    master.clear_line(2);
+    master.print(2, 0, "T: %f", currentPose.theta);
+    pros::delay(250); // Run every 250 ms
+  }
+}
+
+/**
  * Runs initialization code. This occurs as soon as the program is started.
  *
  * All other competition modes are blocked by initialize; it is recommended
@@ -55,17 +100,21 @@ void initialize() {
 
   pros::lcd::register_btn1_cb(on_center_button);
 
-  #if SUDOKU_DISPLAY
+  // Initialize the IMU
+  imu_sensor.reset();
+
+  // Calibrate the Sensors
+  chassis.calibrate();
+
+  // pros::Task controllerTaskHandle(controllerTask);
+
+#if SUDOKU_DISPLAY
   // DISPLAY THE GOAT
   lv_obj_t *img = lv_image_create(lv_screen_active()); // create an image object
   lv_image_set_src(img, &NYT_Sudoku_Logo);             // set the image source
   lv_obj_set_align(
       img, LV_ALIGN_CENTER); // align the image to the center of the screen
-  #endif
-  imu_sensor.reset();
-  // Calibrate the Sensors
-  chassis.calibrate();
-  pros::delay(2000);
+#endif
 }
 
 /**
@@ -97,8 +146,48 @@ void competition_initialize() {}
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
-void autonomous() { 
-  
+void autonomous() {
+
+// Robot 0 Starts on the Left Side
+#if ROBOT_ID == ROBOT_HEN
+  // Set Starting Position
+  chassis.setPose(-60.239, 19.683, 90);
+#if 0
+  // chassis.follow(autom_txt, 15, 2000);
+  chassis.follow(automloader_txt, 15, 3000, true, false);
+  chassis.follow(automlowergoal_txt, 15, 6000, false, false);
+  chassis.turnToHeading(45, 3000, {}, false);
+  chassis.follow(automlowergoaldump_txt, 15, 3000, true, false);
+  chassis.follow(AutomAction4_txt, 15, 3000, false, false);
+  chassis.turnToHeading(0, 3000, {}, false);
+  chassis.follow(AutomAction5_txt, 15, 3000, true, false);
+#endif
+  chassis.follow(AutomAction1_L_txt, 15, 4000, true, false);
+  chassis.follow(AutomAction2_L_txt, 15, 4000, false, false);
+  chassis.turnToHeading(135, 3000, {}, false);
+  chassis.follow(AutomAction3_L_txt, 15, 3000, true, false);
+  chassis.follow(AutomAction4_L_txt, 15, 3000, false, false);
+  chassis.turnToHeading(90, 3000, {}, false);
+  chassis.follow(AutomAction5_L_txt, 15, 5000, true, false);
+  chassis.turnToHeading(0, 3000, {}, false);
+  chassis.follow(AutomAction6_L_txt, 15, 4000, true, false);
+
+// Robot 1 Starts on the Right Side
+#else
+  // Set Starting Position
+  chassis.setPose(-60.239, -18.909, 90);
+  chassis.follow(AutomAction1_R_txt, 15, 5000, true, false);
+  chassis.follow(AutomAction2_R_txt, 15, 5000, false, false);
+  chassis.turnToHeading(45, 3000, {}, false);
+  chassis.follow(AutomAction3_R_txt, 15, 4000, true, false);
+  chassis.follow(AutomAction4_R_txt, 15, 4000, false, false);
+  chassis.turnToHeading(90, 3000, {}, false);
+  chassis.follow(AutomAction5_R_txt, 15, 5000, true, false);
+  chassis.turnToHeading(180, 3000, {}, false);
+  chassis.follow(AutomAction6_R_txt, 15, 4000, true, false);
+#endif
+
+#if 0
   // Set Start position to (0, 0, 0)
   chassis.setPose(0, 0, 0);
   const int timeout_time = 3500;
@@ -127,7 +216,7 @@ void autonomous() {
   // chassis.follow(TestAUTO_txt, 15, 2000);
 
   chassis.cancelAllMotions();
-
+#endif
 #if 0
   // std::cout<<"Heading: "<<chassis.getPose(false).theta<<std::endl;
   // chassis.turnToHeading(180, 4000);
@@ -171,17 +260,12 @@ void autonomous() {
  */
 void opcontrol() {
 
-  // Initialize Controllers
-  pros::Controller master(pros::E_CONTROLLER_MASTER);
-  pros::Controller partner(pros::E_CONTROLLER_PARTNER);
+  bool lift_state = false;
+  bool intake_state = false;
 
-
-bool lift_state = false;
-bool intake_state = false;
-
-// Track previous button states for edge detection
-bool last_lift_button = false;
-bool last_intake_button = false;
+  // Track previous button states for edge detection
+  bool last_lift_button = false;
+  bool last_intake_button = false;
 
   int clk = 0;
   while (true) {
@@ -190,8 +274,7 @@ bool last_intake_button = false;
     int32_t leftY = master.get_analog(ANALOG_LEFT_Y);
 
     // Gets the X axis of the right joystick
-    int32_t rightX = master.get_analog(ANALOG_LEFT_X);
-
+    int32_t rightX = master.get_analog(ANALOG_RIGHT_X);
 
     lemlib::Pose currentPose = chassis.getPose();
     pros::lcd::print(4, "X: %f, Y: %f, Theta: %f", currentPose.x, currentPose.y, currentPose.theta);
@@ -200,9 +283,9 @@ bool last_intake_button = false;
     chassis.arcade(leftY, rightX);
 
     // Intake control
-    int32_t buttonOutake = master.get_digital(pros::E_CONTROLLER_DIGITAL_R1);
-    int32_t buttonIntake = master.get_digital(pros::E_CONTROLLER_DIGITAL_R2);
-    int32_t buttonIntakeHold = master.get_digital(pros::E_CONTROLLER_DIGITAL_A);
+    int32_t buttonOutake = master.get_digital(OUTAKE_BUTTON);
+    int32_t buttonIntake = master.get_digital(INTAKE_BUTTON);
+    int32_t buttonIntakeHold = master.get_digital(INTAKE_REFILL_BUTTON);
     if (buttonOutake) {
       // intake_motors.move(-127 / 2);
       // top_motors.move(-127 / 2);
@@ -225,7 +308,7 @@ bool last_intake_button = false;
       //first_stage.move(0);
     }
 
-    bool lift_button = master.get_digital(pros::E_CONTROLLER_DIGITAL_L1);
+    bool lift_button = master.get_digital(LIFT_PISTON_BUTTON);
 
     // Rising edge: button just got pressed
     if (lift_button && !last_lift_button) {
@@ -236,7 +319,7 @@ bool last_intake_button = false;
 
 
     // ---- INTAKE PISTON TOGGLE (use A) ----
-    bool intake_button = master.get_digital(pros::E_CONTROLLER_DIGITAL_L2);
+    bool intake_button = master.get_digital(INTAKE_PISTON_BUTTON);
 
     if (intake_button && !last_intake_button) {
         intake_state = !intake_state;    // toggle
