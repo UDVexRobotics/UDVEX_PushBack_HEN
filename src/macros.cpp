@@ -1,5 +1,6 @@
 #include "macros.hpp"
 #include "config.hpp"
+#include "pros/adi.h"
 #include <cstdint>
 
 namespace {
@@ -15,12 +16,37 @@ namespace macros {
 // ---- DRIVER MACROS ----
 
 // ---- AUTON MACROS ----
-bool intake_lift(bool state) { return intake_piston.set_value(state); }
+/**
+ * @brief Sets the state of the lift piston.
+ *
+ * @param state True to extend the piston, false to retract.
+ *
+ * @return True if the operation was successful.
+ */
+bool intake_lift(bool state) {
+  return lift_piston.set_value(state) != PROS_ERR;
+}
 
+/**
+ * @brief Sets the state of the intake piston.
+ *
+ * @param state True to close, false to open entry of intake.
+ *
+ * @return True if the operation was successful.
+ */
+bool intake_entry(bool state) {
+  return intake_piston.set_value(state) != PROS_ERR;
+}
+
+/**
+ * @brief Sets the state of the intake motors.
+ *
+ * @param state The desired intake state.
+ */
 void intake_state(IntakeState state) {
   switch (state) {
-  case INTAKE_ON: // Run intake motors forward (Intake game pieces and will
-    //  spit from top)
+  case INTAKE_ON: // Run intake motors forward (Intake game pieces and will spit
+                  // from top)
     intake_motors.move(kMaxMotorVoltage);
     top_motors.move(kMaxMotorVoltage);
     break;

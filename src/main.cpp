@@ -162,15 +162,55 @@ void autonomous() {
   chassis.turnToHeading(0, 3000, {}, false);
   chassis.follow(AutomAction5_txt, 15, 3000, true, false);
 #endif
+  // Go to ball loader
   chassis.follow(AutomAction1_L_txt, 15, 4000, true, false);
+
+  // Grab the bal--, take the loaa--, just get the objectives out
+  macros::intake_entry(true);
+  macros::intake_state(macros::INTAKE_HOLD);
+  pros::delay(2000); // Ensure they're secured
+  macros::intake_entry(false);
+  macros::intake_state(macros::INTAKE_OFF);
+
+  // Back up, turn around, then head to center-upper goal
   chassis.follow(AutomAction2_L_txt, 15, 4000, false, false);
   chassis.turnToHeading(135, 3000, {}, false);
-  chassis.follow(AutomAction3_L_txt, 15, 3000, true, false);
-  chassis.follow(AutomAction4_L_txt, 15, 3000, false, false);
+
+  /**
+   * @bug The robot ends up fairly misaligned here with the goal.
+   * Temporary fix is to manually adjust the robot before hand
+   */
+  chassis.moveToPose(chassis.getPose().x - 9, chassis.getPose().y + 9, 135,
+                     1000, {.forwards = false}, false);
+  chassis.turnToHeading(180, 1000, {}, false);
+  chassis.moveToPose(chassis.getPose().x, chassis.getPose().y - 5, 180, 1000,
+                     {}, false);
+  chassis.turnToHeading(135, 1000, {}, false);
+  chassis.setPose(-24.85, 24.075, 135);
+
+  // Approach the center-upper goal
+  chassis.follow(AutomAction3_L_txt, 15, 2000, true, false);
+
+  // Deposit the balls into the center-upper goal
+  macros::intake_state(macros::OUTTAKE);
+  pros::delay(250); // try to loosen some potentially jammed balls
+
+  // Deposit fully
+  macros::intake_state(macros::INTAKE_ON);
+  pros::delay(2000); // Ensure they're all out
+  macros::intake_state(macros::INTAKE_OFF);
+
+  // Back up, position to the line of pac-man balls
+  chassis.follow(AutomAction4_L_txt, 15, 2000, false, false);
   chassis.turnToHeading(90, 3000, {}, false);
-  chassis.follow(AutomAction5_L_txt, 15, 5000, true, false);
-  chassis.turnToHeading(0, 3000, {}, false);
+  chassis.follow(AutomAction5_L_txt, 15, 3000, true, false);
+  chassis.turnToHeading(0, 2000, {}, false);
+
+  // Wacka-wacka-wacka-wacka-wacka (Pick up the balls)
+  macros::intake_state(macros::INTAKE_HOLD);
   chassis.follow(AutomAction6_L_txt, 15, 4000, true, false);
+  pros::delay(2000); // Ensure they're secured
+  macros::intake_state(macros::INTAKE_OFF);
 
 // Robot 1 Starts on the Right Side
 #else
@@ -277,8 +317,9 @@ void opcontrol() {
     int32_t rightX = master.get_analog(ANALOG_RIGHT_X);
 
     lemlib::Pose currentPose = chassis.getPose();
-    pros::lcd::print(4, "X: %f, Y: %f, Theta: %f", currentPose.x, currentPose.y, currentPose.theta);
-    
+    pros::lcd::print(4, "X: %f, Y: %f, Theta: %f", currentPose.x, currentPose.y,
+                     currentPose.theta);
+
     // Arcade control scheme
     chassis.arcade(leftY, rightX);
 
@@ -287,46 +328,34 @@ void opcontrol() {
     int32_t buttonIntake = master.get_digital(INTAKE_BUTTON);
     int32_t buttonIntakeHold = master.get_digital(INTAKE_REFILL_BUTTON);
     if (buttonOutake) {
-      // intake_motors.move(-127 / 2);
-      // top_motors.move(-127 / 2);
       macros::intake_state(macros::IntakeState::OUTTAKE);
-      // first_stage.move(-127*2/3);
     } else if (buttonIntake) {
-      // intake_motors.move(127);
-      // top_motors.move(127);
       macros::intake_state(macros::IntakeState::INTAKE_ON);
-      // first_stage.move(127*2/3);
     } else if (buttonIntakeHold) {
-      // intake_motors.move(127);
-      // top_motors.move(-127);
       macros::intake_state(macros::IntakeState::INTAKE_HOLD);
-      //first_stage.move(127*2/3);
     } else {
-      // intake_motors.move(0);
-      // top_motors.move(0);
       macros::intake_state(macros::IntakeState::INTAKE_OFF);
-      //first_stage.move(0);
     }
 
     bool lift_button = master.get_digital(LIFT_PISTON_BUTTON);
 
     // Rising edge: button just got pressed
     if (lift_button && !last_lift_button) {
-        lift_state = !lift_state;        // toggle
-        lift_piston.set_value(lift_state);
+      lift_state = !lift_state; // toggle
+      lift_piston.set_value(lift_state);
     }
     last_lift_button = lift_button;
-
 
     // ---- INTAKE PISTON TOGGLE (use A) ----
     bool intake_button = master.get_digital(INTAKE_PISTON_BUTTON);
 
     if (intake_button && !last_intake_button) {
-        intake_state = !intake_state;    // toggle
-        intake_piston.set_value(intake_state);
+      intake_state = !intake_state; // toggle
+      // intake_piston.set_value(intake_state);
+      macros::intake_entry(intake_state);
     }
     last_intake_button = intake_button;
-    
+
     pros::delay(20); // Run for 20 ms then update
   }
 }

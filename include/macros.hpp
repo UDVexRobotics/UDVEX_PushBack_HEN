@@ -13,6 +13,7 @@ enum IntakeState {
 };
 
 bool intake_lift(bool state);
+bool intake_entry(bool state);
 void intake_state(IntakeState state);
 } // namespace macros
 #endif // MACROS_HPP
