@@ -7,11 +7,13 @@
 
 #define ROBOT_HEN 0
 #define ROBOT_EGG 1
+#define AUTON_ENABLED 1
+#define SKILL_ENABLED 1
 
 /**
  * Select Robot ID here
- * ROBOT_HEN: Robot 0
- * ROBOT_EGG: Robot 1
+ * ROBOT_HEN: Robot 0 (Left Side)
+ * ROBOT_EGG: Robot 1 (Right Side)
  */
 #define ROBOT_ID ROBOT_HEN
 
@@ -31,8 +33,8 @@
 #define INTAKE_PISTON_PORT 'B' // Alphabetical Port for intake piston
 
 /** Controls Mapping */
-#define OUTAKE_BUTTON pros::E_CONTROLLER_DIGITAL_R1
-#define INTAKE_BUTTON pros::E_CONTROLLER_DIGITAL_A
+#define OUTAKE_BUTTON pros::E_CONTROLLER_DIGITAL_A
+#define INTAKE_BUTTON pros::E_CONTROLLER_DIGITAL_R1
 #define INTAKE_REFILL_BUTTON pros::E_CONTROLLER_DIGITAL_R2
 #define LIFT_PISTON_BUTTON pros::E_CONTROLLER_DIGITAL_L1
 #define INTAKE_PISTON_BUTTON pros::E_CONTROLLER_DIGITAL_L2
