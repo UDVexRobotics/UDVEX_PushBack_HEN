@@ -35,15 +35,18 @@ LV_IMAGE_DECLARE(NYT_Sudoku_Logo);
 // ASSET(AutomAction4_txt);
 // ASSET(AutomAction5_txt);
 #if ROBOT_ID == ROBOT_HEN
+#if SKILL_ENABLED
 ASSET(AutomAction1_L_txt);
 ASSET(AutomAction2_L_txt);
 ASSET(AutomAction3_L_txt);
 ASSET(AutomAction4_L_txt);
 ASSET(AutomAction5_L_txt);
 ASSET(AutomAction6_L_txt);
+#else
 ASSET(MatchAction1_L_txt);
 ASSET(MatchAction2_L_txt);
 ASSET(MatchAction3_L_txt);
+#endif
 #else
 ASSET(AutomAction1_R_txt);
 ASSET(AutomAction2_R_txt);
@@ -150,21 +153,15 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
+#if AUTON_ENABLED
 
-// Robot 0 Starts on the Left Side
+/** Robot 0 (HEN) Auton: Starts on the Left Side */
+/** ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 #if ROBOT_ID == ROBOT_HEN
   // Set Starting Position
   chassis.setPose(-60.239, 19.683, 90);
-#if 0
-  // chassis.follow(autom_txt, 15, 2000);
-  chassis.follow(automloader_txt, 15, 3000, true, false);
-  chassis.follow(automlowergoal_txt, 15, 6000, false, false);
-  chassis.turnToHeading(45, 3000, {}, false);
-  chassis.follow(automlowergoaldump_txt, 15, 3000, true, false);
-  chassis.follow(AutomAction4_txt, 15, 3000, false, false);
-  chassis.turnToHeading(0, 3000, {}, false);
-  chassis.follow(AutomAction5_txt, 15, 3000, true, false);
-#endif
+
+#if SKILL_ENABLED
   // Go to ball loader
   chassis.follow(AutomAction1_L_txt, 15, 4000, true, false);
 
@@ -174,24 +171,7 @@ void autonomous() {
   pros::delay(2000); // Ensure they're secured
   macros::intake_entry(false);
   macros::intake_state(macros::INTAKE_OFF);
-#if !SKILL_ENABLED
-  // Back up and turn around
-  chassis.follow(MatchAction2_L_txt, 5, 4000, false, false);
-  chassis.turnToHeading(90, 3000, {}, false);
 
-  // Lift intake and approach upper goal
-  macros::intake_lift(true);
-  chassis.follow(MatchAction3_L_txt, 5, 4000, true, false);
-
-  // Deposit the balls into the upper goal
-  macros::intake_state(macros::OUTTAKE);
-  pros::delay(250); // try to loosen some potentially jammed balls
-  // Deposit fully
-  macros::intake_state(macros::INTAKE_ON);
-  pros::delay(2000); // Ensure they're all out
-  macros::intake_state(macros::INTAKE_OFF);
-#else
-#if AUTON_ENABLED
   // Back up, turn around, then head to center-upper goal
   chassis.follow(AutomAction2_L_txt, 15, 4000, false, false);
   chassis.turnToHeading(135, 3000, {}, false);
@@ -226,20 +206,59 @@ void autonomous() {
 // chassis.follow(AutomAction5_L_txt, 15, 3000, true, false);
 // chassis.turnToHeading(0, 2000, {}, false);
 
-// Wacka-wacka-wacka-wacka-wacka (Pick up the balls)
-// macros::intake_state(macros::INTAKE_HOLD);
-// chassis.follow(AutomAction6_L_txt, 15, 4000, true, false);
-// pros::delay(2000); // Ensure they're secured
-// macros::intake_state(macros::INTAKE_OFF);
+  // Wacka-wacka-wacka-wacka-wacka (Pick up the balls)
+  // macros::intake_state(macros::INTAKE_HOLD);
+  // chassis.follow(AutomAction6_L_txt, 15, 4000, true, false);
+  // pros::delay(2000); // Ensure they're secured
+  // macros::intake_state(macros::INTAKE_OFF);
+  // Back up and turn around
+
+#else // MATCH_ENABLED AUTONOMOUS
+
+  // Go to ball loader
+  chassis.follow(MatchAction1_L_txt, 5, 4000, true, false);
+
+  // Grab the bal--, take the loaa--, just get the objectives out
+  macros::intake_entry(true);
+  macros::intake_state(macros::INTAKE_HOLD);
+  pros::delay(2000); // Ensure they're secured
+  macros::intake_entry(false);
+  macros::intake_state(macros::INTAKE_OFF);
+
+  // Back up, and turn around
+  chassis.follow(MatchAction2_L_txt, 5, 4000, false, false);
+  chassis.turnToHeading(45, 3000, {}, false);
+
+  // Try to spit out the opposing balls
+  macros::intake_state(macros::OUTTAKE);
+  pros::delay(2000); // Ensure they're all out
+  macros::intake_state(macros::INTAKE_OFF);
+
+  // Finish turning towards the upper goal
+  chassis.turnToHeading(90, 3000, {}, false);
+
+  // Lift intake and approach upper goal
+  macros::intake_lift(true);
+  chassis.follow(MatchAction3_L_txt, 5, 4000, true, false);
+
+  // Deposit the balls into the upper goal
+  macros::intake_state(macros::OUTTAKE);
+
+  // Deposit fully
+  macros::intake_state(macros::INTAKE_ON);
+  pros::delay(3000); // Ensure they're all out
+  macros::intake_state(macros::INTAKE_OFF);
+
 #endif
-#endif
-// Robot 1 Starts on the Right Side
+
+/** Robot 1 (EGG) Auton: Starts on the Right Side */
+/** ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 #else
   // Set Starting Position
   chassis.setPose(-60.239, -18.909, 90);
 
   // Go to ball loader
-  chassis.follow(AutomAction1_R_txt, 15, 5000, true, false);
+  chassis.follow(AutomAction1_R_txt, 5, 5000, true, false);
 
   // Grab the bal--, take the loaa--, just get the objectives out
   macros::intake_entry(true);
@@ -268,6 +287,7 @@ void autonomous() {
   // chassis.turnToHeading(180, 3000, {}, false);
   // chassis.follow(AutomAction6_R_txt, 15, 4000, true, false);
 #else
+#endif
 #endif
 #endif
 #endif
