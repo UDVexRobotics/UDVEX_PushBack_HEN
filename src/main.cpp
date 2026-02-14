@@ -36,13 +36,15 @@ LV_IMAGE_DECLARE(NYT_Sudoku_Logo);
 // ASSET(AutomAction5_txt);
 #if ROBOT_ID == ROBOT_HEN
 #if SKILL_ENABLED
+ASSET(AutomSkills1_L_txt);
+ASSET(AutomSkills2_L_txt);
+ASSET(AutomSkills3_L_txt);
+ASSET(AutomSkills4_L_txt);
+ASSET(AutomSkills5_L_txt);
+ASSET(AutomSkills6_L_txt);
 ASSET(AutomAction1_L_txt);
-ASSET(AutomAction2_L_txt);
-ASSET(AutomAction3_L_txt);
-ASSET(AutomAction4_L_txt);
-ASSET(AutomAction5_L_txt);
-ASSET(AutomAction6_L_txt);
 #else
+ASSET(MatchAction0_L_txt);
 ASSET(MatchAction1_L_txt);
 ASSET(MatchAction2_L_txt);
 ASSET(MatchAction3_L_txt);
@@ -62,18 +64,6 @@ ASSET(AutomAction6_R_txt);
  * When this callback is fired, it will toggle line 2 of the LCD text between
  * "I was pressed!" and nothing.
  */
-
-void on_center_button()
-	static bool pressed = false;
-	pressed = !pressed;
-	if (pressed)
-	{
-		pros::lcd::set_text(2, "I was pressed!");
-	}
-	else
-	{
-		pros::lcd::clear_line(2);
-	}
 void on_center_button() {
   static bool pressed = false;
   pressed = !pressed;
@@ -112,10 +102,6 @@ void controllerTask(void *param) {
  * All other competition modes are blocked by initialize; it is recommended
  * to keep execution time for this mode under a few seconds.
  */
-void initialize()
-	pros::lcd::initialize();
-	pros::lcd::set_text(1, "Hello PROS User!");
-	pros::lcd::set_text(2, "UDVEX FTW!");
 void initialize() {
   // Initialize the LCD
   pros::lcd::initialize();
@@ -189,7 +175,7 @@ void autonomous() {
   macros::intake_state(macros::INTAKE_OFF);
 
   // Back up, turn around, then head to center-upper goal
-  chassis.follow(AutomAction2_L_txt, 15, 4000, false, false);
+  chassis.follow(AutomSkills2_L_txt, 15, 4000, false, false);
   chassis.turnToHeading(135, 3000, {}, false);
 
   /**
@@ -205,7 +191,7 @@ void autonomous() {
   // chassis.setPose(-24.85, 24.075, 135);
 
   // Approach the center-upper goal
-  chassis.follow(AutomAction3_L_txt, 15, 2000, true, false);
+  chassis.follow(AutomSkills3_L_txt, 15, 2000, true, false);
 
   // Deposit the balls into the center-upper goal
   macros::intake_state(macros::OUTTAKE);
@@ -216,20 +202,19 @@ void autonomous() {
   pros::delay(2000); // Ensure they're all out
   macros::intake_state(macros::INTAKE_OFF);
 
-// Back up, position to the line of pac-man balls
-// chassis.follow(AutomAction4_L_txt, 15, 2000, false, false);
-// chassis.turnToHeading(90, 3000, {}, false);
-// chassis.follow(AutomAction5_L_txt, 15, 3000, true, false);
-// chassis.turnToHeading(0, 2000, {}, false);
+  // move out
+  chassis.follow(AutomSkills4_L_txt, 15, 3000, false, false);
 
-  // Wacka-wacka-wacka-wacka-wacka (Pick up the balls)
-  // macros::intake_state(macros::INTAKE_HOLD);
-  // chassis.follow(AutomAction6_L_txt, 15, 4000, true, false);
-  // pros::delay(2000); // Ensure they're secured
-  // macros::intake_state(macros::INTAKE_OFF);
-  // Back up and turn around
+  // turn towards the long goal
+  chassis.turnToHeading(300, 3000, {}, false);
+  chassis.follow(AutomSkills5_L_txt, 15, 4000, true, false);
 
+  // go to other ball loader
+  chassis.follow(AutomSkills6_L_txt, 15, 5000, true, false);
 #else // MATCH_ENABLED AUTONOMOUS
+
+  // Drive outwards
+  chassis.follow(MatchAction0_L_txt, 5, 4000, true, false);
 
   // Go to ball loader
   chassis.follow(MatchAction1_L_txt, 5, 4000, true, false);
@@ -379,10 +364,6 @@ void autonomous() {
  * operator control task will be stopped. Re-enabling the robot will restart the
  * task, not resume it from where it left off.
  */
-void opcontrol()
-	pros::Controller master(pros::E_CONTROLLER_MASTER);
-	pros::MotorGroup left_mg({1});	// Creates a motor group with forwards ports 1 & 3 and reversed port 2
-	pros::MotorGroup right_mg({4}); // Creates a motor group with forwards port 5 and reversed ports 4 & 6
 void opcontrol() {
 
   bool lift_state = false;
