@@ -175,7 +175,7 @@ void autonomous() {
   macros::intake_state(macros::INTAKE_OFF);
 
   // Back up, turn around, then head to center-upper goal
-  chassis.follow(AutomSkills2_L_txt, 15, 4000, false, false);
+  chassis.follow(AutomSkills2_L_txt, 5, 4000, false, false);
   chassis.turnToHeading(135, 3000, {}, false);
 
   /**
@@ -191,7 +191,7 @@ void autonomous() {
   // chassis.setPose(-24.85, 24.075, 135);
 
   // Approach the center-upper goal
-  chassis.follow(AutomSkills3_L_txt, 15, 2000, true, false);
+  chassis.follow(AutomSkills3_L_txt, 5, 2000, true, false);
 
   // Deposit the balls into the center-upper goal
   macros::intake_state(macros::OUTTAKE);
@@ -203,14 +203,14 @@ void autonomous() {
   macros::intake_state(macros::INTAKE_OFF);
 
   // move out
-  chassis.follow(AutomSkills4_L_txt, 15, 3000, false, false);
+  chassis.follow(AutomSkills4_L_txt, 5, 3000, false, false);
 
   // turn towards the long goal
   chassis.turnToHeading(300, 3000, {}, false);
-  chassis.follow(AutomSkills5_L_txt, 15, 4000, true, false);
+  chassis.follow(AutomSkills5_L_txt, 5, 4000, true, false);
 
   // go to other ball loader
-  chassis.follow(AutomSkills6_L_txt, 15, 5000, true, false);
+  chassis.follow(AutomSkills6_L_txt, 5, 5000, true, false);
 #else // MATCH_ENABLED AUTONOMOUS
 
   // Drive outwards
