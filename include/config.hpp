@@ -8,21 +8,21 @@
 #define ROBOT_HEN 0
 #define ROBOT_EGG 1
 #define AUTON_ENABLED 1
-#define SKILL_ENABLED 1
+#define SKILL_ENABLED 0
 
 /**
  * Select Robot ID here
  * ROBOT_HEN: Robot 0 (Left Side)
  * ROBOT_EGG: Robot 1 (Right Side)
  */
-#define ROBOT_ID ROBOT_HEN
+#define ROBOT_ID ROBOT_EGG
 
 /** Configuartion for Robot 1 (EGG) */
 #if ROBOT_ID == ROBOT_EGG
 /** Port Mapping */
 #define LEFT_MOTOR_PORTS {9, -10, 13, -17} // Numerical Ports for left motors
 #define RIGHT_MOTOR_PORTS {-4, 5, 7, -8}   // Numerical Ports for right motors
-#define IMU_PORT 21                        // Port for Inertial Measurement Unit
+#define IMU_PORT 19                        // Port for Inertial Measurement Unit
 #define INTAKE_MOTOR_PORTS {11, -12, 14, -15, 16} // Ports for intake motors
 #define TOP_MOTOR_PORTS                                                        \
   {-2} // Ports for top motor(s) to be used for holding game pieces
@@ -40,7 +40,7 @@
 #define INTAKE_PISTON_BUTTON pros::E_CONTROLLER_DIGITAL_L2
 
 /** Configuration for Robot 0 (HEN) */
-#else
+#elif ROBOT_ID == ROBOT_HEN
 /** Port Mapping */
 #define LEFT_MOTOR_PORTS {9, -10, 12, -13} // Numerical Ports for left motors
 #define RIGHT_MOTOR_PORTS {7, -8, -17, 18} // Numerical Ports for right motors
@@ -88,6 +88,7 @@ inline pros::adi::DigitalOut lift_piston(LIFT_PISTON_PORT);
 //pros::ADIDigitalOut lift_piston (LIFT_PISTON_PORT);
 inline pros::adi::DigitalOut intake_piston(INTAKE_PISTON_PORT);
 
+#if ROBOT_HEN
 // Tracking Wheels
 inline pros::Rotation vertical_rotation(VERTICAL_TRACKING_WHEEL_PORT);
 inline pros::Rotation horizontal_rotation(HORIZONTAL_TRACKING_WHEEL_PORT);
@@ -101,6 +102,21 @@ inline lemlib::TrackingWheel horizontal_tracking_wheel(
     lemlib::Omniwheel::NEW_2, // orientation
     -3                        // distance from the center of the robot (inches)
 );
+#elif ROBOT_EGG
+// Tracking Wheels
+inline pros::Rotation vertical_rotation(VERTICAL_TRACKING_WHEEL_PORT);
+inline pros::Rotation horizontal_rotation(HORIZONTAL_TRACKING_WHEEL_PORT);
+inline lemlib::TrackingWheel vertical_tracking_wheel(
+    &vertical_rotation,       // rotation sensor
+    lemlib::Omniwheel::NEW_2, // orientation
+    -2.5                      // distance from the center of the robot (inches)
+);
+inline lemlib::TrackingWheel horizontal_tracking_wheel(
+    &horizontal_rotation,     // rotation sensor
+    lemlib::Omniwheel::NEW_2, // orientation
+    -3                        // distance from the center of the robot (inches)
+);
+#endif
 
 // Define sensors
 inline lemlib::OdomSensors
