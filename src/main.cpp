@@ -27,7 +27,7 @@ LV_IMAGE_DECLARE(NYT_Sudoku_Logo);
 #endif
 
 // Declare Static Autom Path
-// ASSET(TestAUTO_txt);
+// TestAUTO_txt);
 // ASSET(autom_txt);
 // ASSET(automloader_txt);
 // ASSET(automlowergoal_txt);
@@ -43,17 +43,27 @@ ASSET(AutomAction4_L_txt);
 ASSET(AutomAction5_L_txt);
 ASSET(AutomAction6_L_txt);
 #else
+ASSET(MatchAction0_L_txt);
 ASSET(MatchAction1_L_txt);
 ASSET(MatchAction2_L_txt);
 ASSET(MatchAction3_L_txt);
 #endif
-#else
+#elif ROBOT_ID == ROBOT_EGG
+#if SKILL_ENABLED
 ASSET(AutomAction1_R_txt);
 ASSET(AutomAction2_R_txt);
 ASSET(AutomAction3_R_txt);
 ASSET(AutomAction4_R_txt);
 ASSET(AutomAction5_R_txt);
 ASSET(AutomAction6_R_txt);
+#else
+ASSET(MatchAction0_R_txt);
+ASSET(MatchAction1_R_txt);
+ASSET(MatchAction2_R_txt);
+ASSET(MatchAction3_R_txt);
+ASSET(MatchActionTest_R_txt);
+ASSET(MatchAction0_Test_R_txt);
+#endif
 #endif
 
 /**
@@ -140,6 +150,18 @@ void disabled() {}
  * starts.
  */
 void competition_initialize() {}
+uint8_t lcd_count = 0;
+void print_pose(const std::string &label) {
+  lemlib::Pose currentPose = chassis.getPose();
+  char buffer[64];
+  snprintf(buffer, sizeof(buffer), "%s - X: %.2f, Y: %.2f, Theta: %.2f",
+           label.c_str(), currentPose.x, currentPose.y, currentPose.theta);
+  pros::lcd::print(lcd_count, buffer);
+  lcd_count++;
+  if (lcd_count > 7) {
+    lcd_count = 0;
+  }
+}
 
 /**
  * Runs the user autonomous code. This function will be started in its own task
@@ -215,6 +237,10 @@ void autonomous() {
 
 #else // MATCH_ENABLED AUTONOMOUS
 
+  // Drive outwards and turn towards ball loader
+  chassis.follow(MatchAction0_L_txt, 5, 4000, true, false);
+  chassis.turnToHeading(0, 3000, {}, false);
+
   // Go to ball loader
   chassis.follow(MatchAction1_L_txt, 5, 4000, true, false);
 
@@ -250,24 +276,13 @@ void autonomous() {
   macros::intake_state(macros::INTAKE_OFF);
 
 #endif
+#elif ROBOT_ID == ROBOT_EGG
+  /** Robot 1 (EGG) Auton: Starts on the Right Side */
+  /** ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-/** Robot 1 (EGG) Auton: Starts on the Right Side */
-/** ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-#else
   // Set Starting Position
-  chassis.setPose(-60.239, -18.909, 90);
+  chassis.setPose(-64.372, -16.739, 90);
 
-  // Go to ball loader
-  chassis.follow(AutomAction1_R_txt, 5, 5000, true, false);
-
-  // Grab the bal--, take the loaa--, just get the objectives out
-  macros::intake_entry(true);
-  macros::intake_state(macros::INTAKE_HOLD);
-  pros::delay(2000); // Ensure they're secured
-  macros::intake_entry(false);
-  macros::intake_state(macros::INTAKE_OFF);
-
-#if AUTON_ENABLED
 #if SKILL_ENABLED
   // Back up, turn around, then head to center-upper goal
   chassis.follow(AutomAction2_R_txt, 5, 5000, false, false);
@@ -286,8 +301,89 @@ void autonomous() {
   // chassis.follow(AutomAction5_R_txt, 15, 5000, true, false);
   // chassis.turnToHeading(180, 3000, {}, false);
   // chassis.follow(AutomAction6_R_txt, 15, 4000, true, false);
-#else
-#endif
+#else // MATCH_ENABLED AUTONOMOUS
+
+  // Go to Ball Loader
+  print_pose("Pre MatchAction0");
+  chassis.follow(MatchAction0_R_txt, 5, 4000, true, false);
+  print_pose("Post MatchAction0");
+
+  // Grab the bal--, take the loaa--, just get the objectives out
+  macros::intake_entry(true);
+  macros::intake_state(macros::INTAKE_HOLD);
+  pros::delay(2000); // Ensure they're secured
+
+  // nudge the ball loader
+  for (int i = 0; i < 3; i++) {
+    chassis.moveToPoint(
+        chassis.getPose().x - 3, chassis.getPose().y, 500, {.forwards = false},
+        false); // Nudge forward to ensure the balls are fully in
+    chassis.moveToPoint(
+        chassis.getPose().x + 2, chassis.getPose().y, 500, {},
+        false); // Nudge forward to ensure the balls are fully in
+    chassis.moveToPoint(
+        chassis.getPose().x - 3, chassis.getPose().y, 500, {.forwards = false},
+        false); // Nudge forward to ensure the balls are fully in
+  }
+  pros::delay(500); // Ensure the balls have settled
+  macros::intake_entry(false);
+  macros::intake_state(macros::INTAKE_OFF);
+
+  // Back up, turn around, then head to center-upper goal
+  print_pose("Pre MatchAction1");
+  chassis.follow(MatchAction1_R_txt, 5, 4000, false, false);
+  print_pose("Post MatchAction1");
+  chassis.turnToHeading(180, 3000, {.maxSpeed = 40, .minSpeed = 5}, false);
+
+  // Try to spit out the opposing balls
+  macros::intake_state(macros::OUTTAKE);
+  pros::delay(750); // Ensure they're all out
+  macros::intake_state(macros::INTAKE_OFF);
+  macros::intake_lift(true);
+  pros::delay(500); // Ensure intake is lifted before moving
+
+  // Finish turning towards the upper goal
+  chassis.turnToHeading(90, 3000, {.maxSpeed = 40, .minSpeed = 5}, false);
+
+  // Approach upper goal
+
+  print_pose("Pre MatchAction2");
+  chassis.follow(MatchAction2_R_txt, 2, 5000, true, false);
+  print_pose("Post MatchAction2");
+
+  // Deposit the balls into the upper goal
+  macros::intake_state(macros::INTAKE_ON);
+  pros::delay(3000);
+  macros::intake_state(macros::INTAKE_OFF);
+
+  return;
+
+  // Back up, and turn around
+  chassis.follow(MatchAction2_R_txt, 10, 4000, false, false);
+  print_pose("MatchAction2");
+  chassis.turnToHeading(135, 3000, {.maxSpeed = 50, .minSpeed = 10}, false);
+
+  // Try to spit out the opposing balls
+  macros::intake_state(macros::OUTTAKE);
+  pros::delay(2000); // Ensure they're all out
+  macros::intake_state(macros::INTAKE_OFF);
+
+  // Finish turning towards the upper goal
+  chassis.turnToHeading(90, 3000, {.maxSpeed = 50, .minSpeed = 10}, false);
+
+  // Lift intake and approach upper goal
+  macros::intake_lift(true);
+  chassis.follow(MatchAction3_R_txt, 10, 4000, true, false);
+  print_pose("MatchAction3");
+
+  // Deposit the balls into the upper goal
+  macros::intake_state(macros::OUTTAKE);
+
+  // Deposit fully
+  macros::intake_state(macros::INTAKE_ON);
+  pros::delay(3000); // Ensure they're all out
+  macros::intake_state(macros::INTAKE_OFF);
+
 #endif
 #endif
 #endif
