@@ -73,6 +73,11 @@ inline pros::Controller master(pros::E_CONTROLLER_MASTER);
 inline pros::Controller partner(pros::E_CONTROLLER_PARTNER);
 
 // Define motors and motor groups here
+/**
+ * Red: 100 RPM, High Torque
+ * Green: 200 RPM, Balanced
+ * Blue: 600 RPM, High Speed
+ */
 inline pros::MotorGroup right_motors(RIGHT_MOTOR_PORTS,
                                      pros::MotorGearset::blue);
 inline pros::MotorGroup left_motors(LEFT_MOTOR_PORTS, pros::MotorGearset::blue);
@@ -106,16 +111,18 @@ inline lemlib::TrackingWheel horizontal_tracking_wheel(
 // Tracking Wheels
 inline pros::Rotation vertical_rotation(VERTICAL_TRACKING_WHEEL_PORT);
 inline pros::Rotation horizontal_rotation(HORIZONTAL_TRACKING_WHEEL_PORT);
-inline lemlib::TrackingWheel vertical_tracking_wheel(
-    &vertical_rotation,       // rotation sensor
-    lemlib::Omniwheel::NEW_2, // orientation
-    -2.5                      // distance from the center of the robot (inches)
-);
-inline lemlib::TrackingWheel horizontal_tracking_wheel(
-    &horizontal_rotation,     // rotation sensor
-    lemlib::Omniwheel::NEW_2, // orientation
-    -3                        // distance from the center of the robot (inches)
-);
+inline lemlib::TrackingWheel
+    vertical_tracking_wheel(&vertical_rotation,       // rotation sensor
+                            lemlib::Omniwheel::NEW_2, // orientation
+                            -4 //-2.6                      // distance from
+                               // the center of the robot (inches)
+    );
+inline lemlib::TrackingWheel
+    horizontal_tracking_wheel(&horizontal_rotation,     // rotation sensor
+                              lemlib::Omniwheel::NEW_2, // orientation
+                              2.6 //-3                        // distance from
+                                  // the center of the robot (inches)
+    );
 #endif
 
 // Define sensors
@@ -174,14 +181,25 @@ inline lemlib::ControllerSettings
     );
 
 // Create the drivetrain object
+#if ROBOT_HEN
 inline lemlib::Drivetrain
-    drivetrain(&left_motors,             // left motor group
-               &right_motors,            // right motor group
-               9,                        // track width (inches)
-               lemlib::Omniwheel::NEW_4, // wheel diameter (inches)
-               360,                      // drivetrain RPM
-               2                         // horizontal drift
+    drivetrain(&left_motors,               // left motor group
+               &right_motors,              // right motor group
+               12,                         // track width (inches)
+               lemlib::Omniwheel::NEW_325, // wheel diameter (inches)
+               600,                        // drivetrain RPM
+               0                           // horizontal drift
     );
+#elif ROBOT_EGG
+inline lemlib::Drivetrain
+    drivetrain(&left_motors,               // left motor group
+               &right_motors,              // right motor group
+               12,                         // track width (inches)
+               lemlib::Omniwheel::NEW_325, // wheel diameter (inches)
+               600,                        // drivetrain RPM
+               -2                          // horizontal drift
+    );
+#endif
 
 // Create the chassis object
 inline lemlib::Chassis chassis(drivetrain,         // drivetrain settings
