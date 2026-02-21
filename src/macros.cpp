@@ -47,8 +47,8 @@ void intake_state(IntakeState state) {
   switch (state) {
   case INTAKE_ON: // Run intake motors forward (Intake game pieces and will spit
                   // from top)
-    intake_motors.move(kMaxMotorVoltage);
-    top_motors.move(kMaxMotorVoltage);
+    intake_motors.move(kHalfMotorVoltage);
+    top_motors.move(kHalfMotorVoltage);
     break;
   case OUTTAKE: // Reverse intake motors (Spit out game pieces)
     intake_motors.move(-kHalfMotorVoltage);
