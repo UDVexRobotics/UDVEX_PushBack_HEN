@@ -315,17 +315,22 @@ void autonomous() {
 
   // nudge the ball loader
   for (int i = 0; i < 3; i++) {
-    chassis.moveToPoint(
-        chassis.getPose().x - 3, chassis.getPose().y, 500, {.forwards = false},
-        false); // Nudge forward to ensure the balls are fully in
-    chassis.moveToPoint(
-        chassis.getPose().x + 2, chassis.getPose().y, 500, {},
-        false); // Nudge forward to ensure the balls are fully in
-    chassis.moveToPoint(
-        chassis.getPose().x - 3, chassis.getPose().y, 500, {.forwards = false},
-        false); // Nudge forward to ensure the balls are fully in
+    // chassis.moveToPoint(
+    //     chassis.getPose().x + 5, chassis.getPose().y, 500,
+    //     {.forwards = false, .minSpeed = 50},
+    //     false); // Slam into loader to ensure the balls are fully in
+
+    // chassis.moveToPoint(chassis.getPose().x - 3, chassis.getPose().y, 500,
+    //                     {.minSpeed = 50},
+    //                     false); // Back up from loader
+    chassis.turnToHeading(280, 1500, {.maxSpeed = 60, .minSpeed = 30}, false);
+    pros::delay(1500);
+    chassis.turnToHeading(260, 1500, {.maxSpeed = 60, .minSpeed = 30}, false);
   }
-  pros::delay(500); // Ensure the balls have settled
+
+  chassis.turnToHeading(270, 1500, {}, false); // Reposition
+
+  pros::delay(2000); // Ensure the balls have settled
   macros::intake_entry(false);
   macros::intake_state(macros::INTAKE_OFF);
 
@@ -337,7 +342,7 @@ void autonomous() {
 
   // Try to spit out the opposing balls
   macros::intake_state(macros::OUTTAKE);
-  pros::delay(750); // Ensure they're all out
+  pros::delay(500); // Ensure they're all out
   macros::intake_state(macros::INTAKE_OFF);
   macros::intake_lift(true);
   pros::delay(500); // Ensure intake is lifted before moving
@@ -346,10 +351,48 @@ void autonomous() {
   chassis.turnToHeading(90, 3000, {.maxSpeed = 40, .minSpeed = 5}, false);
 
   // Approach upper goal
-
   print_pose("Pre MatchAction2");
-  chassis.follow(MatchAction2_R_txt, 2, 5000, true, false);
+  // chassis.follow(MatchAction2_R_txt, 2, 5000, true, false);
+  chassis.moveToPose(-25, -50.578, 90, 6000,
+                     {.forwards = true, .maxSpeed = 20, .minSpeed = 15}, false);
   print_pose("Post MatchAction2");
+
+  // Deposit the balls into the upper goal
+  macros::intake_state(macros::INTAKE_ON);
+  pros::delay(3000);
+  macros::intake_state(macros::INTAKE_OFF);
+
+  // Turn around and go back to the ball loader
+  chassis.moveToPoint(chassis.getPose().x - 4, chassis.getPose().y, 1500,
+                      {.forwards = false, .maxSpeed = 40, .minSpeed = 15},
+                      false);
+  macros::intake_lift(false);
+  pros::delay(250); // Ensure intake is down before moving
+  chassis.turnToHeading(270, 3000, {.maxSpeed = 40, .minSpeed = 10}, false);
+  chassis.moveToPose(-64.372, -46.548, 270, 3000, {}, false);
+
+  // Grab the bal--, take the loaa--, just get the objectives out
+  macros::intake_entry(true);
+  macros::intake_state(macros::INTAKE_HOLD);
+  pros::delay(2000); // Ensure they're secured
+
+  // nudge the ball loader
+  for (int i = 0; i < 3; i++) {
+    chassis.turnToHeading(280, 1500, {.maxSpeed = 60, .minSpeed = 30}, false);
+    pros::delay(750);
+    chassis.turnToHeading(260, 1500, {.maxSpeed = 60, .minSpeed = 30}, false);
+  }
+
+  pros::delay(1000); // Ensure the balls have settled
+  macros::intake_entry(false);
+  macros::intake_state(macros::INTAKE_OFF);
+
+  // Approach Upper Goal Again
+  chassis.turnToHeading(90, 1500, {.maxSpeed = 40, .minSpeed = 10}, false);
+  macros::intake_lift(true); // Lift intake
+  pros::delay(500);          // Ensure intake is lifted before moving
+  chassis.moveToPose(-31, -46.548, 90, 6000,
+                     {.forwards = true, .maxSpeed = 20, .minSpeed = 15}, false);
 
   // Deposit the balls into the upper goal
   macros::intake_state(macros::INTAKE_ON);
