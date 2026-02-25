@@ -93,21 +93,21 @@ inline pros::adi::DigitalOut lift_piston(LIFT_PISTON_PORT);
 //pros::ADIDigitalOut lift_piston (LIFT_PISTON_PORT);
 inline pros::adi::DigitalOut intake_piston(INTAKE_PISTON_PORT);
 
-#if ROBOT_HEN
+#if ROBOT_ID == ROBOT_HEN
 // Tracking Wheels
 inline pros::Rotation vertical_rotation(VERTICAL_TRACKING_WHEEL_PORT);
 inline pros::Rotation horizontal_rotation(HORIZONTAL_TRACKING_WHEEL_PORT);
 inline lemlib::TrackingWheel
     vertical_tracking_wheel(&vertical_rotation,       // rotation sensor
                             lemlib::Omniwheel::NEW_2, // orientation
-                            -2 // distance from the center of the robot (inches)
+                            -4 // distance from the center of the robot (inches)
     );
 inline lemlib::TrackingWheel horizontal_tracking_wheel(
     &horizontal_rotation,     // rotation sensor
     lemlib::Omniwheel::NEW_2, // orientation
     -3                        // distance from the center of the robot (inches)
 );
-#elif ROBOT_EGG
+#elif ROBOT_ID == ROBOT_EGG
 // Tracking Wheels
 inline pros::Rotation vertical_rotation(VERTICAL_TRACKING_WHEEL_PORT);
 inline pros::Rotation horizontal_rotation(HORIZONTAL_TRACKING_WHEEL_PORT);
@@ -181,16 +181,16 @@ inline lemlib::ControllerSettings
     );
 
 // Create the drivetrain object
-#if ROBOT_HEN
+#if ROBOT_ID == ROBOT_HEN
 inline lemlib::Drivetrain
     drivetrain(&left_motors,               // left motor group
                &right_motors,              // right motor group
                12,                         // track width (inches)
                lemlib::Omniwheel::NEW_325, // wheel diameter (inches)
                600,                        // drivetrain RPM
-               0                           // horizontal drift
+               2                           // horizontal drift
     );
-#elif ROBOT_EGG
+#elif ROBOT_ID == ROBOT_EGG
 inline lemlib::Drivetrain
     drivetrain(&left_motors,               // left motor group
                &right_motors,              // right motor group

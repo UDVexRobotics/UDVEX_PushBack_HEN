@@ -1,3 +1,12 @@
+/**
+ * File: main.cpp
+ * @brief This file contains the main entry point for the VEX interface program
+ * @note Slot 1 - Reserved for Main Program (Match Autonomous Enabled)
+ * @note Slot 2- Reserved for Autonomous Disabled
+ * @note Slot 3 -
+ *
+ */
+
 #include "main.h"
 #include "NYT_Sudoku_Logo.h"
 #include "config.hpp"
@@ -236,7 +245,104 @@ void autonomous() {
   // Back up and turn around
 
 #else // MATCH_ENABLED AUTONOMOUS
+  // Go to Ball Loader
+  print_pose("Pre MatchAction0");
+  chassis.follow(MatchAction0_L_txt, 10, 4000, true, false);
+  print_pose("Post MatchAction0");
 
+  // Grab the bal--, take the loaa--, just get the objectives out
+  macros::intake_entry(true);
+  macros::intake_state(macros::INTAKE_HOLD);
+  pros::delay(1500); // Ensure they're secured
+
+  // nudge the ball loader
+  for (int i = 0; i < 3; i++) {
+    // chassis.moveToPoint(
+    //     chassis.getPose().x + 5, chassis.getPose().y, 500,
+    //     {.forwards = false, .minSpeed = 50},
+    //     false); // Slam into loader to ensure the balls are fully in
+
+    // chassis.moveToPoint(chassis.getPose().x - 3, chassis.getPose().y, 500,
+    //                     {.minSpeed = 50},
+    //                     false); // Back up from loader
+    chassis.turnToHeading(280, 1500, {.maxSpeed = 60, .minSpeed = 30}, false);
+    pros::delay(500);
+    chassis.turnToHeading(260, 1500, {.maxSpeed = 60, .minSpeed = 30}, false);
+  }
+
+  chassis.turnToHeading(270, 1500, {}, false); // Reposition
+
+  pros::delay(2000); // Ensure the balls have settled
+  macros::intake_entry(false);
+  macros::intake_state(macros::INTAKE_OFF);
+
+  // Back up, turn around, then head to center-upper goal
+  print_pose("Pre MatchAction1");
+  chassis.follow(MatchAction1_L_txt, 5, 4000, false, false);
+  print_pose("Post MatchAction1");
+  chassis.turnToHeading(0, 3000, {.maxSpeed = 40, .minSpeed = 5}, false);
+
+  // Try to spit out the opposing balls
+  macros::intake_state(macros::OUTTAKE);
+  pros::delay(500); // Ensure they're all out
+  macros::intake_state(macros::INTAKE_OFF);
+  macros::intake_lift(true);
+  pros::delay(500); // Ensure intake is lifted before moving
+
+  // Finish turning towards the upper goal
+  chassis.turnToHeading(90, 3000, {.maxSpeed = 40, .minSpeed = 5}, false);
+
+  // Approach upper goal
+  print_pose("Pre MatchAction2");
+  // chassis.follow(MatchAction2_R_txt, 2, 5000, true, false);
+  chassis.moveToPose(-25, 46.548, 90, 6000,
+                     {.forwards = true, .maxSpeed = 20, .minSpeed = 15}, false);
+  print_pose("Post MatchAction2");
+
+  // Deposit the balls into the upper goal
+  macros::intake_state(macros::INTAKE_ON);
+  pros::delay(3000);
+  macros::intake_state(macros::INTAKE_OFF);
+
+  // Turn around and go back to the ball loader
+  chassis.moveToPoint(chassis.getPose().x - 4, chassis.getPose().y, 1500,
+                      {.forwards = false, .maxSpeed = 40, .minSpeed = 15},
+                      false);
+  macros::intake_lift(false);
+  pros::delay(250); // Ensure intake is down before moving
+  chassis.turnToHeading(270, 3000, {.maxSpeed = 40, .minSpeed = 10}, false);
+  chassis.moveToPose(-64.372, 46.548, 270, 3000, {}, false);
+
+  // Grab the bal--, take the loaa--, just get the objectives out
+  macros::intake_entry(true);
+  macros::intake_state(macros::INTAKE_HOLD);
+  pros::delay(2000); // Ensure they're secured
+
+  // nudge the ball loader
+  for (int i = 0; i < 3; i++) {
+    chassis.turnToHeading(280, 1500, {.maxSpeed = 60, .minSpeed = 30}, false);
+    pros::delay(500);
+    chassis.turnToHeading(260, 1500, {.maxSpeed = 60, .minSpeed = 30}, false);
+  }
+
+  pros::delay(1000); // Ensure the balls have settled
+  macros::intake_entry(false);
+  macros::intake_state(macros::INTAKE_OFF);
+
+  // Approach Upper Goal Again
+  chassis.turnToHeading(90, 1500, {.maxSpeed = 40, .minSpeed = 10}, false);
+  macros::intake_lift(true); // Lift intake
+  pros::delay(500);          // Ensure intake is lifted before moving
+  chassis.moveToPose(-31, 46.548, 90, 6000,
+                     {.forwards = true, .maxSpeed = 20, .minSpeed = 15}, false);
+
+  // Deposit the balls into the upper goal
+  macros::intake_state(macros::INTAKE_ON);
+  pros::delay(3000);
+  macros::intake_state(macros::INTAKE_OFF);
+
+  return;
+#if 0
   // Drive outwards and turn towards ball loader
   chassis.follow(MatchAction0_L_txt, 5, 4000, true, false);
   chassis.turnToHeading(0, 3000, {}, false);
@@ -274,7 +380,7 @@ void autonomous() {
   macros::intake_state(macros::INTAKE_ON);
   pros::delay(3000); // Ensure they're all out
   macros::intake_state(macros::INTAKE_OFF);
-
+#endif
 #endif
 #elif ROBOT_ID == ROBOT_EGG
   /** Robot 1 (EGG) Auton: Starts on the Right Side */
@@ -311,7 +417,7 @@ void autonomous() {
   // Grab the bal--, take the loaa--, just get the objectives out
   macros::intake_entry(true);
   macros::intake_state(macros::INTAKE_HOLD);
-  pros::delay(2000); // Ensure they're secured
+  pros::delay(1500); // Ensure they're secured
 
   // nudge the ball loader
   for (int i = 0; i < 3; i++) {
@@ -324,13 +430,13 @@ void autonomous() {
     //                     {.minSpeed = 50},
     //                     false); // Back up from loader
     chassis.turnToHeading(280, 1500, {.maxSpeed = 60, .minSpeed = 30}, false);
-    pros::delay(1500);
+    pros::delay(500);
     chassis.turnToHeading(260, 1500, {.maxSpeed = 60, .minSpeed = 30}, false);
   }
 
   chassis.turnToHeading(270, 1500, {}, false); // Reposition
 
-  pros::delay(2000); // Ensure the balls have settled
+  pros::delay(1000); // Ensure the balls have settled
   macros::intake_entry(false);
   macros::intake_state(macros::INTAKE_OFF);
 
@@ -338,17 +444,17 @@ void autonomous() {
   print_pose("Pre MatchAction1");
   chassis.follow(MatchAction1_R_txt, 5, 4000, false, false);
   print_pose("Post MatchAction1");
-  chassis.turnToHeading(180, 3000, {.maxSpeed = 40, .minSpeed = 5}, false);
+  chassis.turnToHeading(180, 1500, {.maxSpeed = 40, .minSpeed = 5}, false);
 
   // Try to spit out the opposing balls
   macros::intake_state(macros::OUTTAKE);
   pros::delay(500); // Ensure they're all out
   macros::intake_state(macros::INTAKE_OFF);
   macros::intake_lift(true);
-  pros::delay(500); // Ensure intake is lifted before moving
+  pros::delay(250); // Ensure intake is lifted before moving
 
   // Finish turning towards the upper goal
-  chassis.turnToHeading(90, 3000, {.maxSpeed = 40, .minSpeed = 5}, false);
+  chassis.turnToHeading(90, 1500, {.maxSpeed = 40, .minSpeed = 5}, false);
 
   // Approach upper goal
   print_pose("Pre MatchAction2");
@@ -359,7 +465,7 @@ void autonomous() {
 
   // Deposit the balls into the upper goal
   macros::intake_state(macros::INTAKE_ON);
-  pros::delay(3000);
+  pros::delay(2500);
   macros::intake_state(macros::INTAKE_OFF);
 
   // Turn around and go back to the ball loader
@@ -368,18 +474,18 @@ void autonomous() {
                       false);
   macros::intake_lift(false);
   pros::delay(250); // Ensure intake is down before moving
-  chassis.turnToHeading(270, 3000, {.maxSpeed = 40, .minSpeed = 10}, false);
+  chassis.turnToHeading(270, 1500, {.maxSpeed = 40, .minSpeed = 10}, false);
   chassis.moveToPose(-64.372, -46.548, 270, 3000, {}, false);
 
   // Grab the bal--, take the loaa--, just get the objectives out
   macros::intake_entry(true);
   macros::intake_state(macros::INTAKE_HOLD);
-  pros::delay(2000); // Ensure they're secured
+  pros::delay(1500); // Ensure they're secured
 
   // nudge the ball loader
   for (int i = 0; i < 3; i++) {
     chassis.turnToHeading(280, 1500, {.maxSpeed = 60, .minSpeed = 30}, false);
-    pros::delay(750);
+    pros::delay(500);
     chassis.turnToHeading(260, 1500, {.maxSpeed = 60, .minSpeed = 30}, false);
   }
 
@@ -401,6 +507,7 @@ void autonomous() {
 
   return;
 
+#if 0
   // Back up, and turn around
   chassis.follow(MatchAction2_R_txt, 10, 4000, false, false);
   print_pose("MatchAction2");
@@ -426,6 +533,7 @@ void autonomous() {
   macros::intake_state(macros::INTAKE_ON);
   pros::delay(3000); // Ensure they're all out
   macros::intake_state(macros::INTAKE_OFF);
+#endif
 
 #endif
 #endif
