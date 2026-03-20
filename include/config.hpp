@@ -1,6 +1,7 @@
-#include "lemlib/api.hpp" // IWYU pragma: keep
 #include "api.h"
+#include "lemlib/api.hpp" // IWYU pragma: keep
 #include "lemlib/chassis/trackingWheel.hpp"
+#include "pros/serial.hpp"
 
 #ifndef _UDVEX_CONFIG_H_
 #define _UDVEX_CONFIG_H_
@@ -28,6 +29,9 @@
   {-2} // Ports for top motor(s) to be used for holding game pieces
 #define VERTICAL_TRACKING_WHEEL_PORT 3   // Port for vertical tracking wheel
 #define HORIZONTAL_TRACKING_WHEEL_PORT 6 // Port for horizontal tracking wheel
+
+#define SERIAL_PORT 1    // Port for serial communication (if needed)
+#define BAUD_RATE 250000 // Baud rate for serial communication
 
 #define LIFT_PISTON_PORT 'A'   // Alphabetical Port for lift piston
 #define INTAKE_PISTON_PORT 'B' // Alphabetical Port for intake piston
@@ -71,6 +75,9 @@
 // Initialize Controllers
 inline pros::Controller master(pros::E_CONTROLLER_MASTER);
 inline pros::Controller partner(pros::E_CONTROLLER_PARTNER);
+
+// Initialize Serial Communication
+inline pros::Serial serial(SERIAL_PORT, BAUD_RATE);
 
 // Define motors and motor groups here
 /**

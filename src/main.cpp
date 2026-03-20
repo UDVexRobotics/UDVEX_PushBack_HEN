@@ -159,6 +159,7 @@ void disabled() {}
  * starts.
  */
 void competition_initialize() {}
+
 uint8_t lcd_count = 0;
 void print_pose(const std::string &label) {
   lemlib::Pose currentPose = chassis.getPose();
@@ -166,6 +167,14 @@ void print_pose(const std::string &label) {
   snprintf(buffer, sizeof(buffer), "%s - X: %.2f, Y: %.2f, Theta: %.2f",
            label.c_str(), currentPose.x, currentPose.y, currentPose.theta);
   pros::lcd::print(lcd_count, buffer);
+  lcd_count++;
+  if (lcd_count > 7) {
+    lcd_count = 0;
+  }
+}
+
+void debugPrint(const char *data) {
+  pros::lcd::print(lcd_count, data);
   lcd_count++;
   if (lcd_count > 7) {
     lcd_count = 0;
@@ -184,6 +193,23 @@ void print_pose(const std::string &label) {
  * from where it left off.
  */
 void autonomous() {
+  // Flush the serial buffer to prevent old data from being read
+  serial.flush();
+  while (true) {
+    if (serial.get_read_avail() > 0) {
+      uint8_t buffer[64];
+      serial.read(buffer, 64);
+
+      // Ensure null termination for safe printing
+      buffer[63] = 0x00;
+      pros::lcd::print(lcd_count++, "%s", (char *)buffer);
+      if (lcd_count > 7) {
+        lcd_count = 0;
+      }
+    }
+    pros::delay(100);
+  }
+
 #if AUTON_ENABLED
 
 /** Robot 0 (HEN) Auton: Starts on the Left Side */
@@ -611,6 +637,22 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
+
+  serial.flush();
+  while (true) {
+    if (serial.get_read_avail() > 0) {
+      uint8_t buffer[64];
+      serial.read(buffer, 64);
+
+      // Ensure null termination for safe printing
+      buffer[63] = 0x00;
+      pros::lcd::print(lcd_count++, "%s", (char *)buffer);
+      if (lcd_count > 7) {
+        lcd_count = 0;
+      }
+    }
+    pros::delay(100);
+  }
 
   bool lift_state = false;
   bool intake_state = false;
