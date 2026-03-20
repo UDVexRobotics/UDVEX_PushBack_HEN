@@ -23,6 +23,7 @@
 #include "pros/rtos.hpp"
 #include <cstdint>
 #include <cstdio>
+#include <iostream>
 
 // extern lemlib::Chassis chassis;
 // extern pros::MotorGroup intake_motors;
@@ -75,41 +76,38 @@ ASSET(MatchAction0_Test_R_txt);
 #endif
 #endif
 
+void controllerTask(void *param);
+
 /**
  * A callback function for LLEMU's center button.
  *
  * When this callback is fired, it will toggle line 2 of the LCD text between
  * "I was pressed!" and nothing.
  */
-void on_center_button() {
-  static bool pressed = false;
-  pressed = !pressed;
-  if (pressed) {
-    pros::lcd::set_text(2, "I was pressed!");
-  } else {
-    pros::lcd::clear_line(2);
-  }
-}
+// void on_center_button() {
+//   static bool pressed = false;
+//   pressed = !pressed;
+//   if (pressed) {
+//     pros::lcd::set_text(2, "I was pressed!");
+//   } else {
+//     pros::lcd::clear_line(2);
+//   }
+// }
 
 /**
  * @bug causes program to freeze
  * Intention is to print debugging stats to the controller. Need to explore task
  * feasability more later
  */
+std::atomic<int> gTestCount(0);
 void controllerTask(void *param) {
   while (true) {
     // Your controller code here
-    lemlib::Pose currentPose = chassis.getPose();
-    pros::lcd::print(1, "X: %f, Y: %f, Theta: %f", currentPose.x, currentPose.y,
-                     currentPose.theta);
+    // lemlib::Pose currentPose = chassis.getPose();
+    // pros::lcd::print(1, "Count: %d", gTestCount.load());
 
-    master.clear_line(0);
-    master.print(0, 0, "X: %f", currentPose.x);
-    master.clear_line(1);
-    master.print(1, 0, "Y: %f", currentPose.y);
-    master.clear_line(2);
-    master.print(2, 0, "T: %f", currentPose.theta);
-    pros::delay(250); // Run every 250 ms
+    pros::delay(1000); // Run every 250 ms
+    gTestCount++;
   }
 }
 
@@ -123,7 +121,7 @@ void initialize() {
   // Initialize the LCD
   pros::lcd::initialize();
 
-  pros::lcd::register_btn1_cb(on_center_button);
+  // pros::lcd::register_btn1_cb(on_center_button);
 
   // Initialize the IMU
   imu_sensor.reset();
@@ -131,7 +129,9 @@ void initialize() {
   // Calibrate the Sensors
   chassis.calibrate();
 
-  // pros::Task controllerTaskHandle(controllerTask);
+  pros::Task controllerTaskHandle(controllerTask, nullptr,
+                                  TASK_PRIORITY_DEFAULT + 1,
+                                  TASK_STACK_DEPTH_DEFAULT, "Controller Task");
 
 #if SUDOKU_DISPLAY
   // DISPLAY THE GOAT
@@ -638,21 +638,21 @@ void autonomous() {
  */
 void opcontrol() {
 
-  serial.flush();
-  while (true) {
-    if (serial.get_read_avail() > 0) {
-      uint8_t buffer[64];
-      serial.read(buffer, 64);
+  // serial.flush();
+  // while (true) {
+  //   if (serial.get_read_avail() > 0) {
+  //     uint8_t buffer[64];
+  //     serial.read(buffer, 64);
 
-      // Ensure null termination for safe printing
-      buffer[63] = 0x00;
-      pros::lcd::print(lcd_count++, "%s", (char *)buffer);
-      if (lcd_count > 7) {
-        lcd_count = 0;
-      }
-    }
-    pros::delay(100);
-  }
+  //     // Ensure null termination for safe printing
+  //     buffer[63] = 0x00;
+  //     pros::lcd::print(lcd_count++, "%s", (char *)buffer);
+  //     if (lcd_count > 7) {
+  //       lcd_count = 0;
+  //     }
+  //   }
+  //   pros::delay(100);
+  // }
 
   bool lift_state = false;
   bool intake_state = false;
@@ -674,6 +674,12 @@ void opcontrol() {
     pros::lcd::print(4, "X: %f, Y: %f, Theta: %f", currentPose.x, currentPose.y,
                      currentPose.theta);
 
+    master.set_text(0, 0, " BOO!");
+
+    int testval = gTestCount.load();
+    // pros::lcd::print(1, "Count: %d", testval);
+    std::cout << "Count: " << testval << std::endl;
+    std::cout << "Number of Tasks: " << pros::Task::get_count() << std::endl;
     // Arcade control scheme
     chassis.arcade(leftY, rightX);
 
