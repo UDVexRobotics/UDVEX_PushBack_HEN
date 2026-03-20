@@ -10,6 +10,7 @@
 #define ROBOT_EGG 1
 #define AUTON_ENABLED 1
 #define SKILL_ENABLED 0
+#define SUDOKU_DISPLAY 0
 
 /**
  * Select Robot ID here
@@ -30,8 +31,7 @@
 #define VERTICAL_TRACKING_WHEEL_PORT 3   // Port for vertical tracking wheel
 #define HORIZONTAL_TRACKING_WHEEL_PORT 6 // Port for horizontal tracking wheel
 
-#define SERIAL_PORT 1    // Port for serial communication (if needed)
-#define BAUD_RATE 250000 // Baud rate for serial communication
+#define SERIAL_PORT 1 // Port for serial communication
 
 #define LIFT_PISTON_PORT 'A'   // Alphabetical Port for lift piston
 #define INTAKE_PISTON_PORT 'B' // Alphabetical Port for intake piston
@@ -55,6 +55,8 @@
 #define VERTICAL_TRACKING_WHEEL_PORT 2   // Port for vertical tracking wheel
 #define HORIZONTAL_TRACKING_WHEEL_PORT 4 // Port for horizontal tracking wheel
 
+#define SERIAL_PORT -1 // Port for serial communication
+
 #define LIFT_PISTON_PORT 'A'   // Alphabetical Port for lift piston
 #define INTAKE_PISTON_PORT 'B' // Alphabetical Port for intake piston
 
@@ -77,7 +79,7 @@ inline pros::Controller master(pros::E_CONTROLLER_MASTER);
 inline pros::Controller partner(pros::E_CONTROLLER_PARTNER);
 
 // Initialize Serial Communication
-inline pros::Serial serial(SERIAL_PORT, BAUD_RATE);
+// inline pros::Serial serial(SERIAL_PORT, BAUD_RATE);
 
 // Define motors and motor groups here
 /**

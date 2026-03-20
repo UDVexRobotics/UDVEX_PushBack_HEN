@@ -21,6 +21,7 @@
 #include "pros/adi.hpp"
 #include "pros/rtos.h"
 #include "pros/rtos.hpp"
+#include "serial_rx.hpp"
 #include <cstdint>
 #include <cstdio>
 #include <iostream>
@@ -77,6 +78,7 @@ ASSET(MatchAction0_Test_R_txt);
 #endif
 
 void controllerTask(void *param);
+void HandleRx(void);
 
 /**
  * A callback function for LLEMU's center button.
@@ -132,6 +134,9 @@ void initialize() {
   pros::Task controllerTaskHandle(controllerTask, nullptr,
                                   TASK_PRIORITY_DEFAULT + 1,
                                   TASK_STACK_DEPTH_DEFAULT, "Controller Task");
+
+  // Initialize Serial RX Task
+  SerialRx::SerialRx_TaskInit();
 
 #if SUDOKU_DISPLAY
   // DISPLAY THE GOAT
@@ -193,23 +198,6 @@ void debugPrint(const char *data) {
  * from where it left off.
  */
 void autonomous() {
-  // Flush the serial buffer to prevent old data from being read
-  serial.flush();
-  while (true) {
-    if (serial.get_read_avail() > 0) {
-      uint8_t buffer[64];
-      serial.read(buffer, 64);
-
-      // Ensure null termination for safe printing
-      buffer[63] = 0x00;
-      pros::lcd::print(lcd_count++, "%s", (char *)buffer);
-      if (lcd_count > 7) {
-        lcd_count = 0;
-      }
-    }
-    pros::delay(100);
-  }
-
 #if AUTON_ENABLED
 
 /** Robot 0 (HEN) Auton: Starts on the Left Side */
@@ -638,22 +626,6 @@ void autonomous() {
  */
 void opcontrol() {
 
-  // serial.flush();
-  // while (true) {
-  //   if (serial.get_read_avail() > 0) {
-  //     uint8_t buffer[64];
-  //     serial.read(buffer, 64);
-
-  //     // Ensure null termination for safe printing
-  //     buffer[63] = 0x00;
-  //     pros::lcd::print(lcd_count++, "%s", (char *)buffer);
-  //     if (lcd_count > 7) {
-  //       lcd_count = 0;
-  //     }
-  //   }
-  //   pros::delay(100);
-  // }
-
   bool lift_state = false;
   bool intake_state = false;
 
@@ -676,10 +648,6 @@ void opcontrol() {
 
     master.set_text(0, 0, " BOO!");
 
-    int testval = gTestCount.load();
-    // pros::lcd::print(1, "Count: %d", testval);
-    std::cout << "Count: " << testval << std::endl;
-    std::cout << "Number of Tasks: " << pros::Task::get_count() << std::endl;
     // Arcade control scheme
     chassis.arcade(leftY, rightX);
 
@@ -717,5 +685,15 @@ void opcontrol() {
     last_intake_button = intake_button;
 
     pros::delay(20); // Run for 20 ms then update
+    HandleRx();
+  }
+}
+
+void HandleRx(void) {
+  if (!SerialRx::serialMsgQueue.empty()) {
+    SerialRx::SerialMsg_t msg = SerialRx::serialMsgQueue.front();
+    SerialRx::serialMsgQueue.pop();
+
+    std::cout << "Received message: " << msg.data << std::endl;
   }
 }
